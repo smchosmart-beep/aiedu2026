@@ -33,7 +33,7 @@ const EVAL_LABEL: Record<string, string> = {
 type Props = { data: SurveyResponse; onBack: () => void };
 
 export function Dashboard({ data, onBack }: Props) {
-  const type = classify(data);
+  const { type, score } = classify(data);
 
   const infraItems: { icon: React.ReactNode; text: string }[] = [];
   if (data.deviceOS.some((o) => o === "chromebook" || o === "whalebook")) {
