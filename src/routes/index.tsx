@@ -1,17 +1,15 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { Landing } from "@/components/Landing";
 import { SurveyFlow } from "@/components/survey/SurveyFlow";
 import { seedIfNeeded } from "@/lib/storage";
 
-const searchSchema = z.object({
-  mode: fallback(z.enum(["survey"]).optional(), undefined),
-});
+type Search = { mode?: "survey" };
 
 export const Route = createFileRoute("/")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    mode: s.mode === "survey" ? "survey" : undefined,
+  }),
   component: Index,
   head: () => ({
     meta: [
