@@ -1,26 +1,27 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Landing } from "@/components/Landing";
+import { SurveyFlow } from "@/components/survey/SurveyFlow";
+import { seedIfNeeded } from "@/lib/storage";
+
+type Search = { mode?: "survey" };
 
 export const Route = createFileRoute("/")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    mode: s.mode === "survey" ? "survey" : undefined,
+  }),
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "2026 AI·디지털 선도학교 컨설팅 매칭 대시보드" },
+      { name: "description", content: "선도학교의 상황을 진단하고 교사지원단에게 동적 처방을 제공합니다." },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const { mode } = Route.useSearch();
+  useEffect(() => { seedIfNeeded(); }, []);
+  if (mode === "survey") return <SurveyFlow />;
+  return <Landing />;
 }
