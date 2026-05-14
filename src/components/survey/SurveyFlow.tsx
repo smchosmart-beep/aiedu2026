@@ -17,7 +17,7 @@ const OS_OPTIONS: { v: DeviceOS; label: string }[] = [
   { v: "chromebook", label: "크롬북" },
   { v: "whalebook", label: "웨일북" },
   { v: "ipad", label: "아이패드" },
-  { v: "android", label: "안드로이드 패드" },
+  { v: "android", label: "안드로이드" },
   { v: "windows", label: "윈도우" },
 ];
 const MODE_OPTIONS: { v: DeviceMode; label: string; desc: string }[] = [

@@ -42,9 +42,6 @@ export function Landing() {
           />
         </div>
 
-        <div className="mt-auto pt-12 text-xs text-muted-foreground text-center">
-          시연 코드 <span className="font-mono font-semibold">TEST12</span> 입력 시 샘플 처방전을 볼 수 있어요.
-        </div>
       </div>
     </div>
   );
