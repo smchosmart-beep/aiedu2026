@@ -12,7 +12,7 @@ export type SurveyResponse = {
   deviceOS: DeviceOS[];
   deviceMode: DeviceMode;
   account: Account;
-  skill: Skill;
+  skill: Skill[];
   difficulties: Difficulty[];
   preferredTool: string;
   evalGoal: EvalGoal;
