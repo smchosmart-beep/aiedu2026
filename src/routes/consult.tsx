@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CodeEntry } from "@/components/consult/CodeEntry";
+import { SupportGate } from "@/components/consult/SupportGate";
 import { seedIfNeeded } from "@/lib/storage";
 
 export const Route = createFileRoute("/consult")({
@@ -14,6 +15,17 @@ export const Route = createFileRoute("/consult")({
 });
 
 function ConsultPage() {
-  useEffect(() => { seedIfNeeded(); }, []);
+  const [unlocked, setUnlocked] = useState(false);
+
+  useEffect(() => {
+    seedIfNeeded();
+    try {
+      if (sessionStorage.getItem("consult:gate") === "ok") setUnlocked(true);
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  if (!unlocked) return <SupportGate onUnlock={() => setUnlocked(true)} />;
   return <CodeEntry />;
 }
