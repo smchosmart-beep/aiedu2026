@@ -176,7 +176,7 @@ export function Dashboard({ data, onBack }: Props) {
             />
             <Field label="기기 운용 방식" value={MODE_LABEL[data.deviceMode]} />
             <Field label="에듀테크 계정 환경" value={ACCOUNT_LABEL[data.account]} />
-            <Field label="교사 숙련도" value={SKILL_LABEL[data.skill]} />
+            <Field label="교사 숙련도" value={data.skill.map((s) => SKILL_LABEL[s]).join(", ")} />
             <Field
               label="가장 큰 어려움"
               value={data.difficulties.map((v) => DIFF_LABEL[v]).join(", ") || "-"}

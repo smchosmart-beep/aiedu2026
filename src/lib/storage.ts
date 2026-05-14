@@ -49,7 +49,7 @@ export function seedIfNeeded() {
       deviceOS: ["chromebook"],
       deviceMode: "1to1",
       account: "personal",
-      skill: 4,
+      skill: [4],
       difficulties: ["design", "admin"],
       preferredTool: "Khanmigo",
       evalGoal: "agency",

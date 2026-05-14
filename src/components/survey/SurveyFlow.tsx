@@ -64,7 +64,9 @@ export function SurveyFlow() {
   const [deviceOS, setDeviceOS] = useState<DeviceOS[]>([]);
   const [deviceMode, setDeviceMode] = useState<DeviceMode | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
-  const [skill, setSkill] = useState<Skill | null>(null);
+  const [skill, setSkill] = useState<Skill[]>([]);
+  const toggleSkill = (v: Skill) =>
+    setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
   const [preferredTool, setPreferredTool] = useState("");
   const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
@@ -90,7 +92,7 @@ export function SurveyFlow() {
     const r: SurveyResponse = {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
-      skill: skill!, difficulties,
+      skill, difficulties,
       preferredTool, evalGoal: evalGoal!,
       createdAt: Date.now(),
     };
@@ -105,7 +107,7 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return !!skill && difficulties.length === 2;
+      case 3: return skill.length > 0 && difficulties.length === 2;
       case 4: return preferredTool.trim().length > 0 && !!evalGoal;
       default: return false;
     }
@@ -199,10 +201,10 @@ export function SurveyFlow() {
 
           {step === 3 && (
             <>
-              <Section label="교사 숙련도 (1개)">
+              <Section label={`교사 숙련도 (다중 선택 · ${skill.length}개)`}>
                 {SKILL_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
-                    selected={skill === o.v} onClick={() => setSkill(o.v)} />
+                    selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
                 ))}
               </Section>
               <Section label={`가장 큰 어려움 (정확히 2개 · ${difficulties.length}/2)`}>
