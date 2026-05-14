@@ -19,7 +19,9 @@ export type SurveyResponse = {
   createdAt: number;
 };
 
-export type ConsultType = "A" | "B" | "C";
+export type ConsultType = "A" | "A-B" | "B" | "B-C" | "C";
+
+export type ClassifyResult = { type: ConsultType; score: number };
 
 export const REGIONS = [
   "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
