@@ -160,12 +160,41 @@ export function Dashboard({ data, onBack }: Props) {
         </Widget>
 
         <Widget icon="🎯" title="핵심 수업·평가 모델 처방" delay={0.15}>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             <Badge className="rounded-full bg-primary text-primary-foreground">
               <Target className="w-3 h-3 mr-1" />
               {typeMeta.label}
             </Badge>
+            <span className="text-xs text-muted-foreground font-mono">
+              점수 {score.toFixed(1)} / 5
+            </span>
           </div>
+
+          {/* 5단계 스펙트럼 진행 바 */}
+          <div className="mb-4">
+            <div className="flex items-center gap-1">
+              {STAGES.map((s) => {
+                const active = s.key === type;
+                return (
+                  <div key={s.key} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className={`w-full h-1.5 rounded-full ${
+                        active ? "bg-primary" : "bg-muted"
+                      }`}
+                    />
+                    <span
+                      className={`text-[10px] ${
+                        active ? "text-primary font-bold" : "text-muted-foreground"
+                      }`}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="text-sm font-semibold text-primary mb-1">{typeMeta.stage}</div>
           <p className="text-foreground leading-relaxed">{typeMeta.prescription}</p>
         </Widget>
