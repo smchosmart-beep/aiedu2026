@@ -5,6 +5,31 @@ import { ChevronLeft, Laptop2, Tablet, FileText, UserCog, Target, MessageSquareQ
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
 
+const OS_LABEL: Record<string, string> = {
+  chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
+  android: "안드로이드 패드", windows: "윈도우",
+};
+const MODE_LABEL: Record<string, string> = {
+  "1to1": "1인 1기기", cart: "카트 공용", mobile: "이동 수업",
+};
+const ACCOUNT_LABEL: Record<string, string> = {
+  personal: "개인 계정 완료", shared: "교사 공용 계정", none: "계정 발급 불가",
+};
+const SKILL_LABEL: Record<number, string> = {
+  1: "1단계 · 제시용",
+  2: "2단계 · 상호작용",
+  3: "3단계 · 코스웨어 활용",
+  4: "4단계 · 융합수업 설계",
+};
+const DIFF_LABEL: Record<string, string> = {
+  infra: "인프라 오류", admin: "행정 부담",
+  design: "수업 설계 갈증", account: "계정 관리",
+};
+const EVAL_LABEL: Record<string, string> = {
+  grading: "채점 시간 경감", feedback: "맞춤형 피드백",
+  inquiry: "비판적 탐구", agency: "학생 주체성 평가",
+};
+
 type Props = { data: SurveyResponse; onBack: () => void };
 
 export function Dashboard({ data, onBack }: Props) {
