@@ -7,7 +7,7 @@ import { classify } from "@/lib/classify";
 
 const OS_LABEL: Record<string, string> = {
   chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
-  android: "안드로이드 패드", windows: "윈도우",
+  android: "안드로이드", windows: "윈도우",
 };
 const MODE_LABEL: Record<string, string> = {
   "1to1": "1인 1기기", cart: "카트 공용", mobile: "이동 수업",
