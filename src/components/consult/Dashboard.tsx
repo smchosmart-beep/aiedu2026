@@ -5,6 +5,31 @@ import { ChevronLeft, Laptop2, Tablet, FileText, UserCog, Target, MessageSquareQ
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
 
+const OS_LABEL: Record<string, string> = {
+  chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
+  android: "안드로이드 패드", windows: "윈도우",
+};
+const MODE_LABEL: Record<string, string> = {
+  "1to1": "1인 1기기", cart: "카트 공용", mobile: "이동 수업",
+};
+const ACCOUNT_LABEL: Record<string, string> = {
+  personal: "개인 계정 완료", shared: "교사 공용 계정", none: "계정 발급 불가",
+};
+const SKILL_LABEL: Record<number, string> = {
+  1: "1단계 · 제시용",
+  2: "2단계 · 상호작용",
+  3: "3단계 · 코스웨어 활용",
+  4: "4단계 · 융합수업 설계",
+};
+const DIFF_LABEL: Record<string, string> = {
+  infra: "인프라 오류", admin: "행정 부담",
+  design: "수업 설계 갈증", account: "계정 관리",
+};
+const EVAL_LABEL: Record<string, string> = {
+  grading: "채점 시간 경감", feedback: "맞춤형 피드백",
+  inquiry: "비판적 탐구", agency: "학생 주체성 평가",
+};
+
 type Props = { data: SurveyResponse; onBack: () => void };
 
 export function Dashboard({ data, onBack }: Props) {
@@ -137,14 +162,27 @@ export function Dashboard({ data, onBack }: Props) {
           <summary className="cursor-pointer font-semibold text-muted-foreground">
             응답 원본 보기
           </summary>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-muted-foreground">
-            <Field label="기기 OS" value={data.deviceOS.join(", ")} />
-            <Field label="운용 방식" value={data.deviceMode} />
-            <Field label="계정" value={data.account} />
-            <Field label="숙련도" value={`${data.skill}단계`} />
-            <Field label="어려움" value={data.difficulties.join(", ")} />
-            <Field label="선호 도구" value={data.preferredTool} />
-            <Field label="평가 목표" value={data.evalGoal} />
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+            <Field label="공유 코드" value={data.code} />
+            <Field
+              label="제출 일시"
+              value={new Date(data.createdAt).toLocaleString("ko-KR")}
+            />
+            <Field label="지역" value={data.region} />
+            <Field label="학교명" value={data.schoolName} />
+            <Field
+              label="기기 OS"
+              value={data.deviceOS.map((v) => OS_LABEL[v]).join(", ") || "-"}
+            />
+            <Field label="기기 운용 방식" value={MODE_LABEL[data.deviceMode]} />
+            <Field label="에듀테크 계정 환경" value={ACCOUNT_LABEL[data.account]} />
+            <Field label="교사 숙련도" value={SKILL_LABEL[data.skill]} />
+            <Field
+              label="가장 큰 어려움"
+              value={data.difficulties.map((v) => DIFF_LABEL[v]).join(", ") || "-"}
+            />
+            <Field label="선호 에듀테크 도구" value={data.preferredTool || "-"} />
+            <Field label="평가 혁신 목표" value={EVAL_LABEL[data.evalGoal]} />
           </div>
         </details>
 
