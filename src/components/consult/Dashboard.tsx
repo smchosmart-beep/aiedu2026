@@ -69,12 +69,18 @@ export function Dashboard({ data, onBack }: Props) {
     });
   }
 
-  const typeMeta = {
+  const TYPE_META: Record<typeof type, { label: string; stage: string; prescription: string; script: string }> = {
     A: {
       label: "Type A · 입문형",
       stage: "📢 [1단계 입문형]",
       prescription: "계정 없이 접속 가능한 AI 수학 코스웨어 중심의 채점 자동화 루틴을 심어주세요.",
       script: "선생님, 복잡한 계정 잊으세요. 이 링크로 아이들 접속시키면 채점은 기계가 다 해줍니다.",
+    },
+    "A-B": {
+      label: "Type A-B · 입문→표준 전환형",
+      stage: "📢 [1.5단계 전환 준비형]",
+      prescription: "채점 자동화 루틴을 안정화하면서, 다음 단계로 'AI가 만든 문제를 학생이 풀고 풀이 과정을 설명'하는 1차시 실험을 권하세요.",
+      script: "지금 채점 자동화로 시간을 확보하셨다면, 그 10분을 학생이 AI에게 자기 풀이를 설명하는 활동에 써보세요.",
     },
     B: {
       label: "Type B · 표준형",
@@ -82,13 +88,28 @@ export function Dashboard({ data, onBack }: Props) {
       prescription: "내장형 AI 챗봇이 써준 초안의 오류를 학생이 고치는 '비판적 대화' 모델을 제안하세요.",
       script: "AI가 준 초안을 그대로 제출하게 두지 마세요. AI와 논쟁한 대화 로그를 평가하십시오.",
     },
+    "B-C": {
+      label: "Type B-C · 표준→전문가 전환형",
+      stage: "📢 [2.5단계 심화 진입형]",
+      prescription: "'비판적 대화' 모델을 운영하시면서, 단원 1개에 한정해 AI 응답의 수학적 오류를 학생이 반례로 반박하는 미니 프로젝트를 시도해 보세요.",
+      script: "AI와 논쟁시키는 단계까지 오셨다면, 이번엔 학생이 'AI 너 틀렸어'라고 수학적으로 증명하는 한 차시를 설계해 보십시오.",
+    },
     C: {
       label: "Type C · 전문가형",
       stage: "📢 [3단계 전문가형]",
       prescription: "7의 배수 사례처럼, AI의 한계를 수학적으로 검증하는 인간 주체성 중심의 수업을 설계하세요.",
       script: "기술을 의심하게 만드십시오. AI 알고리즘의 오류를 수학적 원리로 반박하게 가르치는 것이 진짜 혁신입니다.",
     },
-  }[type];
+  };
+  const typeMeta = TYPE_META[type];
+
+  const STAGES: { key: typeof type; label: string }[] = [
+    { key: "A", label: "A" },
+    { key: "A-B", label: "A-B" },
+    { key: "B", label: "B" },
+    { key: "B-C", label: "B-C" },
+    { key: "C", label: "C" },
+  ];
 
   return (
     <div className="min-h-screen pb-16">
