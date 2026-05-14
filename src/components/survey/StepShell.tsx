@@ -19,12 +19,18 @@ export function StepShell({
   step, total, title, subtitle, onBack, onNext, nextLabel = "다음", canNext, children,
 }: Props) {
   const progress = ((step + 1) / total) * 100;
+  const navigate = useNavigate();
+  const goHome = () => {
+    if (window.confirm("진단을 중단하고 홈으로 돌아갈까요? 입력한 내용은 저장되지 않아요.")) {
+      navigate({ to: "/" });
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col">
       <div className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b">
         <div className="max-w-xl mx-auto px-5 py-4 flex items-center gap-3">
           {onBack ? (
-            <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-muted">
+            <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-muted" aria-label="이전 단계">
               <ChevronLeft className="w-6 h-6" />
             </button>
           ) : <div className="w-8" />}
@@ -36,9 +42,12 @@ export function StepShell({
               transition={{ duration: 0.4 }}
             />
           </div>
-          <div className="text-xs text-muted-foreground tabular-nums w-10 text-right">
+          <div className="text-xs text-muted-foreground tabular-nums w-8 text-right">
             {step + 1}/{total}
           </div>
+          <button onClick={goHome} className="p-1 -mr-1 rounded-full hover:bg-muted" aria-label="홈으로">
+            <Home className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
