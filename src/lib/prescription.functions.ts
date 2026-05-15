@@ -90,7 +90,32 @@ function buildUserPrompt(d: PrescriptionInput): string {
 - 학생 계정 상태: ${d.account}
 - 기기 운용 방식: ${d.deviceMode}
 
-위 데이터에 기반하여 시스템 지시문에 따라 순수 JSON 객체 하나만 반환해.`;
+위 데이터에 기반하여 시스템 지시문에 따라 순수 JSON 객체 하나만 반환해.
+
+[중요] 위 '선호 에듀테크 도구' 항목은 교사 입력값 그대로의 참고치일 뿐이다. 처방 본문(title/modelDefinition/flow/evaluationPoints/commonTraps/consultingScript)에서는 해당 도구를 절대 고유명사로 부르지 말고, "${subject}과 에듀테크" 또는 카테고리/기능명("AI 진단 리포트 도구", "생성형 AI 챗봇", "협업 화이트보드" 등)으로만 지칭하라.`;
+}
+
+// 잘 알려진 한국 에듀테크 제품·서비스 명칭 블랙리스트 (1차 방어선)
+const PRODUCT_BLACKLIST = [
+  "옥수수", "똑똑수학탐험대", "똑똑 수학탐험대", "칸아카데미", "Khan Academy",
+  "뤼튼", "Wrtn", "ChatGPT", "Chat GPT", "Gemini", "제미나이", "Claude", "클로드",
+  "Copilot", "코파일럿", "캔바", "Canva", "미리캔버스", "패들렛", "Padlet",
+  "클래스팅", "Classting", "하이러닝", "AIDT", "클로바", "CLOVA",
+  "구글 클래스룸", "Google Classroom", "구글클래스룸",
+  "MS 팀즈", "Microsoft Teams", "팀즈",
+  "에듀테이블", "엘리스", "Elice", "콴다", "QANDA",
+];
+
+function sanitizeProductNames(text: string): string {
+  let out = text;
+  for (const name of PRODUCT_BLACKLIST) {
+    const re = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    if (re.test(out)) {
+      console.warn(`[prescription] 제품명 노출 감지 → 일반화 치환: ${name}`);
+      out = out.replace(re, "에듀테크 도구");
+    }
+  }
+  return out;
 }
 
 export const generatePrescription = createServerFn({ method: "POST" })
