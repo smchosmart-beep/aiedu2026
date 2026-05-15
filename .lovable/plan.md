@@ -1,37 +1,34 @@
-# 점수 체계 정합성 수정 (총점 5.0 만점)
+## 변경 목적
 
-`src/lib/classify.ts`만 수정합니다. Dashboard의 `/ 5` 표기는 유지됩니다.
+선호 에듀테크 도구 입력을 단일 텍스트 → "하나씩 추가" 방식의 다중 입력 리스트로 변경.
 
-## 변경 1: 계정 환경 점수 축소
+## UI 동작
 
-```
-personal → 1.0  (이전 2)
-shared   → 0.5  (이전 1)
-none     → 0    (변동 없음, + 하드 오버라이드 A 유지)
-```
+- 입력칸 1개 + `+ 추가` 버튼
+- Enter 또는 추가 버튼 클릭 시 현재 입력값을 하단 칩(chip) 리스트에 추가, 입력칸 비움
+- 각 칩에는 `×` 삭제 버튼
+- 중복/공백 입력은 무시
+- 최소 1개 이상 추가되어야 다음 단계 진행 가능 (기존 검증 규칙 대체)
 
-## 변경 2: 총점 구성 (이론 최대 5.0)
+## 데이터 모델 변경
 
-| 신호 | 범위 |
-|---|---|
-| 계정 환경 | 0 ~ 1 |
-| 숙련도 평균(1~4 → 0~3) | 0 ~ 3 |
-| 어려움 보정 (design +1, infra/account만 -0.5) | -0.5 ~ +1 |
-| **합계** | **-0.5 ~ 5.0** |
+`src/lib/types.ts`
+- `preferredTool: string` → `preferredTools: string[]`
 
-## 변경 3: 분류 임계값 재조정
+`src/lib/storage.ts` (시드 데이터)
+- `preferredTool: "Khanmigo"` → `preferredTools: ["Khanmigo"]`
 
-기존 6점 만점 기준을 5점 스케일로 비례 축소 후 깔끔한 값으로 정리:
+## 컴포넌트 수정
 
-```
-score ≤ 1.0  → A
-score ≤ 2.0  → A-B
-score ≤ 3.0  → B
-score ≤ 4.0  → B-C
-score >  4.0 → C
-```
+`src/components/survey/SurveyFlow.tsx`
+- state: `preferredTool: string` → `preferredTools: string[]` + 임시 입력용 `toolDraft: string`
+- step 4 UI를 입력+추가 버튼+칩 리스트 형태로 교체
+- `canNext` step 4 검증: `preferredTools.length > 0 && !!evalGoal`
+- 제출 payload에 `preferredTools` 사용
 
-## 그 외
+`src/components/consult/Dashboard.tsx`
+- `data.preferredTool` → `data.preferredTools.join(", ")` (없으면 "-")
 
-- `ConsultType`, Dashboard의 `TYPE_META`, 5단계 진행 바, `점수 X.X / 5` 표기 모두 그대로 둡니다.
-- `account === "none"` → A 하드 오버라이드 유지.
+## 영향 범위
+
+분류 로직(`classify.ts`)에는 사용되지 않으므로 점수/타입에 영향 없음.
