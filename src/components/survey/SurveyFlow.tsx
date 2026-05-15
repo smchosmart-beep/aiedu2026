@@ -122,7 +122,7 @@ export function SurveyFlow() {
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
       case 3: return skill.length > 0 && difficulties.length === 2;
-      case 4: return preferredTool.trim().length > 0 && !!evalGoal;
+      case 4: return preferredTools.length > 0 && !!evalGoal;
       default: return false;
     }
   })();
