@@ -107,7 +107,7 @@ export function SurveyFlow() {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
-      preferredTool, evalGoal: evalGoal!,
+      preferredTools, evalGoal: evalGoal!,
       createdAt: Date.now(),
     };
     saveResponse(r);
