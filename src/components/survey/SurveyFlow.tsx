@@ -84,6 +84,7 @@ export function SurveyFlow() {
   const removeTool = (v: string) =>
     setPreferredTools((p) => p.filter((x) => x !== v));
   const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
+  const [targetSubject, setTargetSubject] = useState("");
 
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
