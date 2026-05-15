@@ -234,14 +234,49 @@ export function SurveyFlow() {
             <>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  선호 에듀테크 도구
+                  선호 에듀테크 도구 ({preferredTools.length}개)
                 </label>
-                <Input
-                  value={preferredTool}
-                  onChange={(e) => setPreferredTool(e.target.value)}
-                  placeholder="예) Khanmigo, 똑똑수학탐험대"
-                  className="mt-2 h-14 rounded-2xl text-base"
-                />
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    value={toolDraft}
+                    onChange={(e) => setToolDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTool();
+                      }
+                    }}
+                    placeholder="예) Khanmigo"
+                    className="h-14 rounded-2xl text-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={addTool}
+                    className="h-14 shrink-0 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                  >
+                    + 추가
+                  </button>
+                </div>
+                {preferredTools.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {preferredTools.map((t) => (
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-secondary-foreground"
+                      >
+                        {t}
+                        <button
+                          type="button"
+                          onClick={() => removeTool(t)}
+                          className="text-muted-foreground transition hover:text-foreground"
+                          aria-label={`${t} 삭제`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Section label="평가 혁신 목표 (1개)">
                 {EVAL_OPTIONS.map((o) => (
