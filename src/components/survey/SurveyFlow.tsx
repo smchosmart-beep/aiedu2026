@@ -87,16 +87,8 @@ export function SurveyFlow() {
 
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
-  const toggleDiff = (v: Difficulty) => {
-    setDifficulties((p) => {
-      if (p.includes(v)) return p.filter((x) => x !== v);
-      if (p.length >= 2) {
-        toast("최대 2개까지 선택할 수 있어요");
-        return p;
-      }
-      return [...p, v];
-    });
-  };
+  const toggleDiff = (v: Difficulty) =>
+    setDifficulties((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
 
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
