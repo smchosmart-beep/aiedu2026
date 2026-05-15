@@ -54,7 +54,7 @@ export function CodeEntry() {
               autoFocus
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="예) TEST12"
+              placeholder="6자리 코드 입력"
               maxLength={6}
               className="h-16 text-center text-2xl tracking-[0.5em] font-mono rounded-2xl"
             />
@@ -66,9 +66,6 @@ export function CodeEntry() {
             >
               처방전 보기
             </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              시연 코드: <span className="font-mono font-semibold">TEST12</span>
-            </p>
           </form>
         </motion.div>
       </div>

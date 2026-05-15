@@ -39,23 +39,6 @@ export function getResponse(code: string): SurveyResponse | null {
 }
 
 export function seedIfNeeded() {
-  if (typeof window === "undefined") return;
-  const all = readAll();
-  if (!all["TEST12"]) {
-    all["TEST12"] = {
-      code: "TEST12",
-      region: "서울",
-      schoolName: "00초등학교",
-      deviceOS: ["chromebook"],
-      deviceMode: "1to1",
-      account: "personal",
-      skill: [4],
-      difficulties: ["design", "admin"],
-      preferredTools: ["Khanmigo"],
-      targetSubject: "수학",
-      evalGoal: "agency",
-      createdAt: Date.now(),
-    };
-    writeAll(all);
-  }
+  // no-op: 시연용 하드코딩 데이터 제거
 }
+
