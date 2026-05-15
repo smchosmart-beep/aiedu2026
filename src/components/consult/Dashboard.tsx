@@ -268,7 +268,7 @@ export function Dashboard({ data, onBack }: Props) {
         </motion.div>
 
         <Widget icon="🤖" title="AI 맞춤 처방전" delay={0.02}>
-          {aiQuery.isLoading && (
+          {aiQuery.isFetching && (
             <div className="flex items-center gap-2 text-muted-foreground py-6">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm">
@@ -292,7 +292,7 @@ export function Dashboard({ data, onBack }: Props) {
             </div>
           )}
 
-          {aiQuery.data && (
+          {aiQuery.data && !aiQuery.isFetching && (
             <div className="space-y-5">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" />
