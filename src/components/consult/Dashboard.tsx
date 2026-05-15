@@ -218,6 +218,29 @@ export function Dashboard({ data, onBack }: Props) {
   if (data.account === "none") difficultyBadges.push("계정 발급 불가");
   else if (data.account === "shared") difficultyBadges.push("교사 공용 계정");
 
+  const generate = useServerFn(generatePrescription);
+  const aiQuery = useQuery({
+    queryKey: ["prescription", data.code],
+    queryFn: () =>
+      generate({
+        data: {
+          type,
+          typeLabel: typeMeta.label,
+          subject: data.targetSubject ?? "",
+          tools: data.preferredTools ?? [],
+          difficulties: (data.difficulties ?? []).map((d) => DIFF_LABEL[d] ?? d),
+          evalGoal: EVAL_LABEL[data.evalGoal] ?? data.evalGoal,
+          schoolName: data.schoolName,
+          region: data.region,
+          skill: data.skill ?? [],
+          account: ACCOUNT_LABEL[data.account] ?? data.account,
+          deviceMode: MODE_LABEL[data.deviceMode] ?? data.deviceMode,
+        },
+      }),
+    staleTime: Infinity,
+    retry: false,
+  });
+
   return (
     <div className="min-h-screen pb-16">
       <div className="border-b bg-background/90 backdrop-blur sticky top-0 z-10">
