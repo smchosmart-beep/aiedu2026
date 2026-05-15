@@ -1,16 +1,33 @@
 ## 변경 목적
 
-"가장 큰 어려움" 선택 제약을 "정확히 2개"에서 "1개 이상(상한 없음)"으로 완화.
+설문에 "수업 평가 혁신 대상 과목" 입력을 추가.
 
-## 수정 파일
+## UI 동작
+
+- step 4(마지막)에서 평가 혁신 목표 위에 새 입력칸 1개 추가.
+- 초등 교육 맥락에 맞는 자유 입력(예: 수학, 국어, 과학 등). 단일 텍스트.
+- 1개 이상 작성해야 진단 완료 가능.
+
+## 데이터 모델
+
+`src/lib/types.ts`
+- `SurveyResponse`에 `targetSubject: string` 필드 추가.
+
+`src/lib/storage.ts` (시드)
+- `targetSubject: "수학"` 추가.
+
+## 컴포넌트 수정
 
 `src/components/survey/SurveyFlow.tsx`
+- state: `const [targetSubject, setTargetSubject] = useState("")`
+- step 4 UI: 선호 도구 위쪽에 라벨 "평가 혁신 대상 과목" + Input 배치
+- `canNext` step 4: `preferredTools.length > 0 && !!evalGoal && targetSubject.trim().length > 0`
+- 제출 payload에 `targetSubject` 포함
 
-1. **`toggleDiff`**: 2개 상한 제한 및 토스트 제거 → 단순 토글로 변경.
-2. **검증 (`canNext` step 3)**: `difficulties.length === 2` → `difficulties.length >= 1`.
-3. **섹션 라벨**: `가장 큰 어려움 (정확히 2개 · {n}/2)` → `가장 큰 어려움 (1개 이상 · {n}개)`.
+`src/components/consult/Dashboard.tsx`
+- 응답 원본 보기에 `<Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />` 추가
 
 ## 영향 범위
 
-- `classify.ts`의 어려움 보정 로직(`hasDesign`, `onlyInfraOrAccount`)은 배열 내용 기반이라 그대로 동작.
-- 데이터 모델/저장 구조 변경 없음.
+- 분류 로직(`classify.ts`)에는 사용하지 않음 — 점수/타입 무관.
+- 기존 저장된 응답에는 필드가 없을 수 있어 Dashboard에서 `|| "-"` fallback 처리.

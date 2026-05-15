@@ -52,6 +52,7 @@ export function seedIfNeeded() {
       skill: [4],
       difficulties: ["design", "admin"],
       preferredTools: ["Khanmigo"],
+      targetSubject: "수학",
       evalGoal: "agency",
       createdAt: Date.now(),
     };

@@ -84,6 +84,7 @@ export function SurveyFlow() {
   const removeTool = (v: string) =>
     setPreferredTools((p) => p.filter((x) => x !== v));
   const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
+  const [targetSubject, setTargetSubject] = useState("");
 
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
@@ -99,7 +100,7 @@ export function SurveyFlow() {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
-      preferredTools, evalGoal: evalGoal!,
+      preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
     saveResponse(r);
@@ -114,7 +115,7 @@ export function SurveyFlow() {
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
       case 3: return skill.length > 0 && difficulties.length >= 1;
-      case 4: return preferredTools.length > 0 && !!evalGoal;
+      case 4: return preferredTools.length > 0 && !!evalGoal && targetSubject.trim().length > 0;
       default: return false;
     }
   })();
@@ -224,6 +225,17 @@ export function SurveyFlow() {
 
           {step === 4 && (
             <>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
+                  평가 혁신 대상 과목
+                </label>
+                <Input
+                  value={targetSubject}
+                  onChange={(e) => setTargetSubject(e.target.value)}
+                  placeholder="예) 수학, 국어, 과학"
+                  className="mt-2 h-14 rounded-2xl text-base"
+                />
+              </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
                   선호 에듀테크 도구 ({preferredTools.length}개)

@@ -369,6 +369,7 @@ export function Dashboard({ data, onBack }: Props) {
               label="가장 큰 어려움"
               value={data.difficulties.map((v) => DIFF_LABEL[v]).join(", ") || "-"}
             />
+            <Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />
             <Field label="선호 에듀테크 도구" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />
             <Field label="평가 혁신 목표" value={EVAL_LABEL[data.evalGoal]} />
           </div>
