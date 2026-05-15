@@ -87,16 +87,8 @@ export function SurveyFlow() {
 
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
-  const toggleDiff = (v: Difficulty) => {
-    setDifficulties((p) => {
-      if (p.includes(v)) return p.filter((x) => x !== v);
-      if (p.length >= 2) {
-        toast("최대 2개까지 선택할 수 있어요");
-        return p;
-      }
-      return [...p, v];
-    });
-  };
+  const toggleDiff = (v: Difficulty) =>
+    setDifficulties((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
 
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -121,7 +113,7 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return skill.length > 0 && difficulties.length === 2;
+      case 3: return skill.length > 0 && difficulties.length >= 1;
       case 4: return preferredTools.length > 0 && !!evalGoal;
       default: return false;
     }
@@ -221,7 +213,7 @@ export function SurveyFlow() {
                     selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
                 ))}
               </Section>
-              <Section label={`가장 큰 어려움 (정확히 2개 · ${difficulties.length}/2)`}>
+              <Section label={`가장 큰 어려움 (1개 이상 · ${difficulties.length}개)`}>
                 {DIFF_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
                     selected={difficulties.includes(o.v)} onClick={() => toggleDiff(o.v)} />
