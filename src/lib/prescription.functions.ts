@@ -30,11 +30,12 @@ const SYSTEM_PROMPT = `너는 대한민국 교육부의 'AI·디지털 선도학
 
 입력된 선도학교의 진단 설문 데이터(과목, 선호 도구, 페인포인트, 학교 Type 등)를 분석하여, 담당 지원단 교사가 현장 컨설팅에서 즉시 활용할 수 있는 [맞춤형 수업·평가 처방전]을 JSON 형식으로만 반환해.
 
-**[초개인화 맞춤형 강제화 지시어 (매우 중요)]**
+**[사실성 가드레일 — 반드시 지킬 것]**
 
-1. 사용자가 '혁신을 원하는 과목'으로 [{입력된 과목}]을, '선호 도구'로 [{입력된 도구들}]을 선택했어.
-2. 과목 성취기준 연계: 처방전 내용에는 반드시 해당 [{입력된 과목}]의 전형적인 단원(예: 국어-논설문, 수학-도형, 사회-지역문제 등)을 구체적인 예시로 들어서 수업 시나리오를 설계해.
-3. 도구의 실전 활용: 두루뭉술하게 'AI를 활용하여'라고 쓰지 말고, "{입력된 도구명}의 00기능을 열어서 ~하게 하세요"라고 정확히 지칭해. 만약 입력된 도구가 해당 Type과 어울리지 않아 보여도, 도구의 기본 기능을 역이용하거나 비틀어서 훌륭하게 논리를 연결해 내야 해.
+1. **에듀테크 제품·서비스의 고유명사 절대 금지**: 처방전 본문(title, modelDefinition, flow, evaluationPoints, commonTraps, consultingScript)에 어떤 에듀테크 제품명·서비스명·앱명도 쓰지 마. (예: 옥수수, 똑똑수학탐험대, 칸아카데미, 뤼튼, ChatGPT, Gemini, Claude, 캔바, 미리캔버스, 패들렛, 클래스팅, 하이러닝, 클로바, 구글 클래스룸, MS 팀즈 등 일체 금지)
+2. **카테고리/기능 단위로 일반화**해서 진술해. 허용 표현 예시: "{과목}과 에듀테크", "수학 코스웨어", "AI 진단 리포트 도구", "생성형 AI 챗봇", "협업 화이트보드", "디지털 교과서", "AI 작문 보조 도구", "자동 채점 도구".
+3. **함수적 지칭**: "○○ 기능이 있는 도구를 활용해 ~한다" 형태로 능력을 기술하고, 어떤 제품을 쓸지는 교사 판단에 맡겨. 존재 여부가 불확실한 기능을 특정 제품에 귀속시키지 마.
+4. **단원 예시 가드레일**: 가짜 단원명·성취기준 코드는 만들지 말고, 잘 모르면 "학년 수준에 맞는 단원" 같은 일반화 표현을 써. 전형적 영역(국어-논설문, 수학-도형, 사회-지역문제 등) 수준의 일반 예시는 허용.
 
 **[학교 Type별 평가 혁신 철학 (반드시 아래 방향성을 엄격히 지킬 것)]**
 
@@ -89,7 +90,32 @@ function buildUserPrompt(d: PrescriptionInput): string {
 - 학생 계정 상태: ${d.account}
 - 기기 운용 방식: ${d.deviceMode}
 
-위 데이터에 기반하여 시스템 지시문에 따라 순수 JSON 객체 하나만 반환해.`;
+위 데이터에 기반하여 시스템 지시문에 따라 순수 JSON 객체 하나만 반환해.
+
+[중요] 위 '선호 에듀테크 도구' 항목은 교사 입력값 그대로의 참고치일 뿐이다. 처방 본문(title/modelDefinition/flow/evaluationPoints/commonTraps/consultingScript)에서는 해당 도구를 절대 고유명사로 부르지 말고, "${subject}과 에듀테크" 또는 카테고리/기능명("AI 진단 리포트 도구", "생성형 AI 챗봇", "협업 화이트보드" 등)으로만 지칭하라.`;
+}
+
+// 잘 알려진 한국 에듀테크 제품·서비스 명칭 블랙리스트 (1차 방어선)
+const PRODUCT_BLACKLIST = [
+  "옥수수", "똑똑수학탐험대", "똑똑 수학탐험대", "칸아카데미", "Khan Academy",
+  "뤼튼", "Wrtn", "ChatGPT", "Chat GPT", "Gemini", "제미나이", "Claude", "클로드",
+  "Copilot", "코파일럿", "캔바", "Canva", "미리캔버스", "패들렛", "Padlet",
+  "클래스팅", "Classting", "하이러닝", "AIDT", "클로바", "CLOVA",
+  "구글 클래스룸", "Google Classroom", "구글클래스룸",
+  "MS 팀즈", "Microsoft Teams", "팀즈",
+  "에듀테이블", "엘리스", "Elice", "콴다", "QANDA",
+];
+
+function sanitizeProductNames(text: string): string {
+  let out = text;
+  for (const name of PRODUCT_BLACKLIST) {
+    const re = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    if (re.test(out)) {
+      console.warn(`[prescription] 제품명 노출 감지 → 일반화 치환: ${name}`);
+      out = out.replace(re, "에듀테크 도구");
+    }
+  }
+  return out;
 }
 
 export const generatePrescription = createServerFn({ method: "POST" })
@@ -142,16 +168,17 @@ export const generatePrescription = createServerFn({ method: "POST" })
       parsed = JSON.parse(cleaned);
     }
 
+    const s = sanitizeProductNames;
     return {
-      title: String(parsed.title ?? ""),
-      modelDefinition: String(parsed.modelDefinition ?? ""),
-      flow: Array.isArray(parsed.flow) ? parsed.flow.map(String) : [],
+      title: s(String(parsed.title ?? "")),
+      modelDefinition: s(String(parsed.modelDefinition ?? "")),
+      flow: Array.isArray(parsed.flow) ? parsed.flow.map((v) => s(String(v))) : [],
       evaluationPoints: Array.isArray(parsed.evaluationPoints)
-        ? parsed.evaluationPoints.map(String)
+        ? parsed.evaluationPoints.map((v) => s(String(v)))
         : [],
       commonTraps: Array.isArray(parsed.commonTraps)
-        ? parsed.commonTraps.map(String)
+        ? parsed.commonTraps.map((v) => s(String(v)))
         : [],
-      consultingScript: String(parsed.consultingScript ?? ""),
+      consultingScript: s(String(parsed.consultingScript ?? "")),
     };
   });
