@@ -168,16 +168,17 @@ export const generatePrescription = createServerFn({ method: "POST" })
       parsed = JSON.parse(cleaned);
     }
 
+    const s = sanitizeProductNames;
     return {
-      title: String(parsed.title ?? ""),
-      modelDefinition: String(parsed.modelDefinition ?? ""),
-      flow: Array.isArray(parsed.flow) ? parsed.flow.map(String) : [],
+      title: s(String(parsed.title ?? "")),
+      modelDefinition: s(String(parsed.modelDefinition ?? "")),
+      flow: Array.isArray(parsed.flow) ? parsed.flow.map((v) => s(String(v))) : [],
       evaluationPoints: Array.isArray(parsed.evaluationPoints)
-        ? parsed.evaluationPoints.map(String)
+        ? parsed.evaluationPoints.map((v) => s(String(v)))
         : [],
       commonTraps: Array.isArray(parsed.commonTraps)
-        ? parsed.commonTraps.map(String)
+        ? parsed.commonTraps.map((v) => s(String(v)))
         : [],
-      consultingScript: String(parsed.consultingScript ?? ""),
+      consultingScript: s(String(parsed.consultingScript ?? "")),
     };
   });
