@@ -227,6 +227,17 @@ export function SurveyFlow() {
             <>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
+                  평가 혁신 대상 과목
+                </label>
+                <Input
+                  value={targetSubject}
+                  onChange={(e) => setTargetSubject(e.target.value)}
+                  placeholder="예) 수학, 국어, 과학"
+                  className="mt-2 h-14 rounded-2xl text-base"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">
                   선호 에듀테크 도구 ({preferredTools.length}개)
                 </label>
                 <div className="mt-2 flex gap-2">
