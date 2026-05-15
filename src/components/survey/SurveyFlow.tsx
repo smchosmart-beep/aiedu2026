@@ -68,7 +68,21 @@ export function SurveyFlow() {
   const toggleSkill = (v: Skill) =>
     setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
-  const [preferredTool, setPreferredTool] = useState("");
+  const [preferredTools, setPreferredTools] = useState<string[]>([]);
+  const [toolDraft, setToolDraft] = useState("");
+  const addTool = () => {
+    const v = toolDraft.trim();
+    if (!v) return;
+    if (preferredTools.includes(v)) {
+      toast("이미 추가된 도구예요");
+      setToolDraft("");
+      return;
+    }
+    setPreferredTools((p) => [...p, v]);
+    setToolDraft("");
+  };
+  const removeTool = (v: string) =>
+    setPreferredTools((p) => p.filter((x) => x !== v));
   const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
 
   const toggleOS = (v: DeviceOS) =>
