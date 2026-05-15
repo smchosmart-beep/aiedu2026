@@ -68,7 +68,21 @@ export function SurveyFlow() {
   const toggleSkill = (v: Skill) =>
     setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
-  const [preferredTool, setPreferredTool] = useState("");
+  const [preferredTools, setPreferredTools] = useState<string[]>([]);
+  const [toolDraft, setToolDraft] = useState("");
+  const addTool = () => {
+    const v = toolDraft.trim();
+    if (!v) return;
+    if (preferredTools.includes(v)) {
+      toast("이미 추가된 도구예요");
+      setToolDraft("");
+      return;
+    }
+    setPreferredTools((p) => [...p, v]);
+    setToolDraft("");
+  };
+  const removeTool = (v: string) =>
+    setPreferredTools((p) => p.filter((x) => x !== v));
   const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
 
   const toggleOS = (v: DeviceOS) =>
@@ -93,7 +107,7 @@ export function SurveyFlow() {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
-      preferredTool, evalGoal: evalGoal!,
+      preferredTools, evalGoal: evalGoal!,
       createdAt: Date.now(),
     };
     saveResponse(r);
@@ -108,7 +122,7 @@ export function SurveyFlow() {
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
       case 3: return skill.length > 0 && difficulties.length === 2;
-      case 4: return preferredTool.trim().length > 0 && !!evalGoal;
+      case 4: return preferredTools.length > 0 && !!evalGoal;
       default: return false;
     }
   })();
@@ -220,14 +234,49 @@ export function SurveyFlow() {
             <>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  선호 에듀테크 도구
+                  선호 에듀테크 도구 ({preferredTools.length}개)
                 </label>
-                <Input
-                  value={preferredTool}
-                  onChange={(e) => setPreferredTool(e.target.value)}
-                  placeholder="예) Khanmigo, 똑똑수학탐험대"
-                  className="mt-2 h-14 rounded-2xl text-base"
-                />
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    value={toolDraft}
+                    onChange={(e) => setToolDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTool();
+                      }
+                    }}
+                    placeholder="예) Khanmigo"
+                    className="h-14 rounded-2xl text-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={addTool}
+                    className="h-14 shrink-0 rounded-2xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                  >
+                    + 추가
+                  </button>
+                </div>
+                {preferredTools.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {preferredTools.map((t) => (
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm text-secondary-foreground"
+                      >
+                        {t}
+                        <button
+                          type="button"
+                          onClick={() => removeTool(t)}
+                          className="text-muted-foreground transition hover:text-foreground"
+                          aria-label={`${t} 삭제`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <Section label="평가 혁신 목표 (1개)">
                 {EVAL_OPTIONS.map((o) => (

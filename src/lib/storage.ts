@@ -51,7 +51,7 @@ export function seedIfNeeded() {
       account: "personal",
       skill: [4],
       difficulties: ["design", "admin"],
-      preferredTool: "Khanmigo",
+      preferredTools: ["Khanmigo"],
       evalGoal: "agency",
       createdAt: Date.now(),
     };
