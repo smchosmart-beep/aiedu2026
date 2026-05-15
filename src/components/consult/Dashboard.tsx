@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, ListOrdered } from "lucide-react";
+import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { generatePrescription } from "@/lib/prescription.functions";
 
 const OS_LABEL: Record<string, string> = {
   chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
@@ -215,6 +218,29 @@ export function Dashboard({ data, onBack }: Props) {
   if (data.account === "none") difficultyBadges.push("계정 발급 불가");
   else if (data.account === "shared") difficultyBadges.push("교사 공용 계정");
 
+  const generate = useServerFn(generatePrescription);
+  const aiQuery = useQuery({
+    queryKey: ["prescription", data.code],
+    queryFn: () =>
+      generate({
+        data: {
+          type,
+          typeLabel: typeMeta.label,
+          subject: data.targetSubject ?? "",
+          tools: data.preferredTools ?? [],
+          difficulties: (data.difficulties ?? []).map((d) => DIFF_LABEL[d] ?? d),
+          evalGoal: EVAL_LABEL[data.evalGoal] ?? data.evalGoal,
+          schoolName: data.schoolName,
+          region: data.region,
+          skill: data.skill ?? [],
+          account: ACCOUNT_LABEL[data.account] ?? data.account,
+          deviceMode: MODE_LABEL[data.deviceMode] ?? data.deviceMode,
+        },
+      }),
+    staleTime: Infinity,
+    retry: false,
+  });
+
   return (
     <div className="min-h-screen pb-16">
       <div className="border-b bg-background/90 backdrop-blur sticky top-0 z-10">
@@ -241,7 +267,92 @@ export function Dashboard({ data, onBack }: Props) {
           <p className="text-muted-foreground mt-1">컨설팅 처방전</p>
         </motion.div>
 
-        <Widget icon="🎯" title="핵심 수업·평가 모델 처방" delay={0.05}>
+        <Widget icon="🤖" title="AI 맞춤 처방전" delay={0.02}>
+          {aiQuery.isLoading && (
+            <div className="flex items-center gap-2 text-muted-foreground py-6">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">
+                {data.targetSubject || "선택한 과목"} · {(data.preferredTools ?? []).join(", ") || "선호 도구"} 기반 맞춤 처방전을 작성 중입니다…
+              </span>
+            </div>
+          )}
+
+          {aiQuery.isError && (
+            <div className="space-y-3">
+              <div className="flex items-start gap-2 text-amber-700 text-sm">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>
+                  {(aiQuery.error as Error)?.message ?? "처방전 생성에 실패했습니다."}
+                </span>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => aiQuery.refetch()}>
+                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                다시 생성
+              </Button>
+            </div>
+          )}
+
+          {aiQuery.data && (
+            <div className="space-y-5">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <p className="text-lg font-bold text-foreground leading-snug">
+                  {aiQuery.data.title}
+                </p>
+              </div>
+
+              <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의">
+                <p className="text-[15px] leading-relaxed text-foreground">
+                  {aiQuery.data.modelDefinition}
+                </p>
+              </Section>
+
+              <Section icon={<ListOrdered className="w-4 h-4" />} title="수업 흐름">
+                <ol className="space-y-1.5 text-[15px] leading-relaxed text-foreground list-decimal pl-5 marker:text-primary marker:font-semibold">
+                  {aiQuery.data.flow.map((s, i) => <li key={i}>{s}</li>)}
+                </ol>
+              </Section>
+
+              <Section icon={<CheckCircle2 className="w-4 h-4" />} title="평가 포인트">
+                <ul className="space-y-1.5">
+                  {aiQuery.data.evaluationPoints.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-primary mt-1 shrink-0" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+
+              <Section icon={<AlertTriangle className="w-4 h-4" />} title="흔한 함정">
+                <ul className="space-y-1.5">
+                  {aiQuery.data.commonTraps.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-foreground">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 mt-1 shrink-0" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+
+              <div className="rounded-2xl bg-primary/5 border-l-4 border-primary p-4">
+                <MessageSquareQuote className="w-5 h-5 text-primary mb-2" />
+                <p className="text-foreground text-[15px] leading-relaxed font-medium">
+                  "{aiQuery.data.consultingScript}"
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button size="sm" variant="ghost" onClick={() => aiQuery.refetch()}>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                  다시 생성
+                </Button>
+              </div>
+            </div>
+          )}
+        </Widget>
+
+        <Widget icon="🎯" title="핵심 수업·평가 모델 처방 (기준 모델)" delay={0.05}>
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             <Badge className="rounded-full bg-primary text-primary-foreground">
               <Target className="w-3 h-3 mr-1" />
