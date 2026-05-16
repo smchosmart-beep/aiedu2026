@@ -36,8 +36,8 @@ function ViewPage() {
       <div className="max-w-2xl w-full mx-auto px-5 pt-6">
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
           <TabsList className="grid grid-cols-3 w-full rounded-2xl h-auto">
-            <TabsTrigger value="search" className="rounded-xl">학교명으로 찾기</TabsTrigger>
-            <TabsTrigger value="browse" className="rounded-xl">학교급·과목으로 찾기</TabsTrigger>
+            <TabsTrigger value="search" className="rounded-xl">학교명 검색</TabsTrigger>
+            <TabsTrigger value="browse" className="rounded-xl">학교급·과목 검색</TabsTrigger>
             <TabsTrigger value="keyword" className="rounded-xl">키워드 검색</TabsTrigger>
           </TabsList>
           <TabsContent value="search" className="mt-0">
