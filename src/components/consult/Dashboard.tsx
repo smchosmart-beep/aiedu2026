@@ -558,13 +558,19 @@ function Widget({
   );
 }
 
-function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Section({ icon, title, summary, children }: { icon: React.ReactNode; title: string; summary?: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2 text-primary">
         {icon}
         <h4 className="text-sm font-bold">{title}</h4>
       </div>
+      {summary && (
+        <div className="mb-2 rounded-lg bg-primary/5 px-3 py-1.5 text-[13px] text-foreground/80 leading-snug">
+          <span className="font-semibold text-primary mr-1.5">요약</span>
+          {summary}
+        </div>
+      )}
       {children}
     </div>
   );
@@ -578,3 +584,14 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// Render **bold** markdown safely without dangerouslySetInnerHTML
+function renderBold(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    const m = p.match(/^\*\*([^*]+)\*\*$/);
+    if (m) return <strong key={i} className="font-bold text-foreground">{m[1]}</strong>;
+    return <span key={i}>{p}</span>;
+  });
+}
+
