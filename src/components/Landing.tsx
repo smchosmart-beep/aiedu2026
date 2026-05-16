@@ -14,7 +14,7 @@ export function Landing() {
             2026 AI·디지털 선도학교
           </div>
           <h1 className="text-3xl font-bold mt-2 leading-tight">
-            컨설팅 매칭<br />대시보드
+            컨설팅<br />처방 가이드
           </h1>
           <p className="text-muted-foreground mt-3">
             우리 학교 상황을 진단하고, 교사지원단의<br />
