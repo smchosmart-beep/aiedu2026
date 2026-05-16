@@ -203,14 +203,6 @@ const TYPE_META: Record<TypeKey, TypeContent> = {
   },
 };
 
-const STAGES: { key: TypeKey; label: string }[] = [
-  { key: "A", label: "A" },
-  { key: "A-B", label: "A-B" },
-  { key: "B", label: "B" },
-  { key: "B-C", label: "B-C" },
-  { key: "C", label: "C" },
-];
-
 type Props = { data: SurveyResponse; onBack: () => void };
 
 export function Dashboard({ data, onBack }: Props) {
