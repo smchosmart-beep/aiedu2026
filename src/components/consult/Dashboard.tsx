@@ -100,7 +100,7 @@ export function Dashboard({ data, onBack, readOnly = false }: Props) {
           )}
         </Widget>
 
-        <ConsultationPanel surveyCode={data.code} />
+        <ConsultationPanel surveyCode={data.code} readOnly={readOnly} />
 
         <div className="pt-4">
           <Button variant="outline" onClick={onBack} className="w-full h-12 rounded-2xl">
