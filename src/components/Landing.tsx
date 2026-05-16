@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, PencilLine, ArrowRight } from "lucide-react";
+import { ClipboardList, PencilLine, Eye, ArrowRight } from "lucide-react";
 
 export function Landing() {
   return (
