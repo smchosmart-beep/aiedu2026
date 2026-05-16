@@ -135,7 +135,14 @@ export function CodeEntry({
                   className="w-full text-left p-4 rounded-2xl border bg-card hover:bg-muted/50 transition flex items-center justify-between"
                 >
                   <div className="min-w-0">
-                    <div className="font-medium truncate">{r.schoolName}</div>
+                    <div className="font-medium truncate">
+                      {r.schoolName}
+                      {r.targetSubject && (
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
+                          {r.targetSubject}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       {r.region} · {new Date(r.createdAt).toLocaleString("ko-KR")}
                     </div>
