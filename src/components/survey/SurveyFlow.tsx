@@ -228,6 +228,14 @@ export function SurveyFlow() {
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
                     selected={difficulties.includes(o.v)} onClick={() => toggleDiff(o.v)} />
                 ))}
+                {difficulties.includes("other") && (
+                  <Input
+                    value={otherDifficulty}
+                    onChange={(e) => setOtherDifficulty(e.target.value)}
+                    placeholder="기타 고민을 입력해 주세요"
+                    className="mt-2 h-14 rounded-2xl text-base"
+                  />
+                )}
               </Section>
             </>
           )}
