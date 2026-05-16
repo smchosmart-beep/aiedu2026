@@ -52,9 +52,24 @@ export function StepShell({
           <div className="text-xs text-muted-foreground tabular-nums w-8 text-right">
             {step + 1}/{total}
           </div>
-          <button onClick={goHome} className="p-1 -mr-1 rounded-full hover:bg-muted" aria-label="홈으로">
+          <button onClick={() => setConfirmOpen(true)} className="p-1 -mr-1 rounded-full hover:bg-muted" aria-label="홈으로">
             <Home className="w-5 h-5" />
           </button>
+        </div>
+      </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>진단을 중단할까요?</AlertDialogTitle>
+            <AlertDialogDescription>입력한 내용은 저장되지 않아요.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate({ to: "/" })}>확인</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
         </div>
       </div>
 
