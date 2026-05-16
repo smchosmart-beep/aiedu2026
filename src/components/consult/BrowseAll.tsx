@@ -63,9 +63,9 @@ export function BrowseAll() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className="text-xl font-bold">전체 컨설팅 결과 둘러보기</h2>
+        <h2 className="text-xl font-bold">학교급·과목으로 찾기</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          학교급과 과목으로 필터링해 결과를 살펴보세요
+          학교급과 과목을 선택하면 결과가 표시됩니다
         </p>
       </motion.div>
 
