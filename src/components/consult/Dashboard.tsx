@@ -418,6 +418,8 @@ export function Dashboard({ data, onBack }: Props) {
             </span>
           </div>
           <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
+
+          <TypeGuideCard guide={TYPE_GUIDE[type]} />
         </Widget>
 
         <Widget icon="⚠️" title="현재 겪고 있는 어려움 (확인용)" delay={0.15}>
