@@ -137,11 +137,6 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
           </article>
         ))}
       </div>
-
-      <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
-        <MessageSquareQuote className="w-3 h-3 mt-0.5 shrink-0" />
-        이 페이지의 모든 컨설팅 기록은 공유 코드를 아는 누구나 열람할 수 있습니다.
-      </p>
     </div>
   );
 }
