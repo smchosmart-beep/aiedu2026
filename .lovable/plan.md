@@ -1,87 +1,50 @@
-## 목표
+# 컨설팅 처방전 대시보드 UI 개선 계획
 
-AI가 생성하는 컨설팅 처방전을 **디지털 초보 교사도 한눈에 읽히도록** 단순화합니다. 학술 문체와 긴 문장 때문에 어렵게 느껴지는 문제를 세 가지 장치로 해결합니다.
+## 1. 기본 모델 처방 영역 축소 (`Dashboard.tsx` 398~477줄)
 
-1. 각 섹션 맨 위에 **한 줄 요약(TL;DR)** 을 먼저 보여준다.
-2. AI 본문에 `**굵은 글씨**` 마크업을 허용하고, 화면에서 강조 처리한다.
-3. 문장 길이·문체를 강하게 제약한다 (한 문장 60자 이내, 구어체 우선).
+- 기존 `"핵심 수업·평가 모델 처방 (기준 모델)"` Widget을 **`"기본 진단 결과"`** 로 타이틀 변경 (아이콘은 🎯 유지).
+- 내부에서 **삭제**할 것:
+  - 모델 정의 / 1차시 운영 흐름 / 평가 포인트 / 흔한 함정 / 다음 단계 5개 Section 전부 (436~476줄)
+  - STAGES 진행 막대 (409~431줄)
+  - `typeMeta.stage` 텍스트 (433줄)
+- **남길 것**:
+  - `Type 뱃지`: `<Badge>` 안에 `Target` 아이콘 + `typeMeta.label`(예: "Type C · 전문가형") 크게 표시
+  - 점수 표기 (`점수 X.X / 5`)
+  - `typeMeta.oneLiner` 1~2줄 요약만 표시
+- 결과: 약 80줄짜리 위젯이 ~15줄짜리 컴팩트 카드 1개로 축소.
+- 참고: `TYPE_META` 상수 자체는 `oneLiner`/`label`/`script`가 아직 일부 사용되므로 **삭제하지 않음**. 단 더 이상 참조되지 않는 `STAGES` 상수와 `Target`을 제외한 미사용 import는 정리.
 
----
+## 2. AI 맞춤 처방전: Accordion 도입 (`Dashboard.tsx` 295~395줄)
 
-## 구체 변경 내용
+- shadcn `Accordion` (`@/components/ui/accordion`)을 새로 import.
+- 다음 3개 Section을 `<Accordion type="multiple">` 안의 `AccordionItem`으로 변환 (기본 닫힘 상태):
+  - `수업 흐름` (flow)
+  - `평가 포인트` (evaluationPoints)
+  - `흔한 함정` (commonTraps)
+- 각 `AccordionTrigger`에는 기존 `Section`이 보여주던 **아이콘 + 제목 + summary 한 줄**을 좌측 정렬로 노출하여 닫힌 상태에서도 핵심을 파악 가능하게 함.
+- `AccordionContent`에 기존 ol/ul 리스트 본문을 그대로 렌더링.
+- 상단 영역(타이틀 / 한 줄 요약 / 모델 정의)은 **항상 노출** 유지 — 모델 정의는 짧고 핵심이므로 아코디언 밖에 둠.
 
-### 1) `src/lib/prescription.functions.ts` — 프롬프트 강화
+## 3. 현장 스크립트 카드 + 복사 기능
 
-**시스템 프롬프트에 가독성 가드레일 추가:**
-- 독자: "일반 선도학교 교사 (디지털 초보 포함)"
-- 문체: 격식 있는 학술 문체 금지. 구어체("~합니다", "~하세요") 우선.
-- 한자어·외래어 최소화. 어려운 용어는 괄호로 풀어 쓰기. (예: "비판적 수용 → AI 말을 그대로 믿지 않고 따져보기")
-- 한 문장 60자 이내 권장, 최대 80자. 한 항목당 2문장 이내.
-- 핵심 명사/동사 2~4개에 `**굵게**` 마크업 사용 (마크다운 별표).
-- 추상어 대신 **행동·예시 중심** 으로.
-
-**출력 스키마에 `summary` 필드 신설:**
-```ts
-{
-  title: string;
-  summary: string;          // 신설: 처방 전체를 한 문장으로 압축 (40자 이내)
-  modelDefinition: string;
-  modelSummary: string;     // 신설: 모델 정의 한 줄 요약
-  flow: string[];
-  evaluationPoints: string[];
-  evaluationSummary: string; // 신설: 평가 포인트 핵심 한 줄
-  commonTraps: string[];
-  trapsSummary: string;     // 신설: 함정 핵심 한 줄
-  consultingScript: string;
-}
-```
-
-(필드를 늘리지 않고 기존 필드 첫 줄을 요약으로 쓰는 안도 있지만, 명시적 필드가 AI 준수도가 훨씬 높음.)
-
-### 2) `src/components/consult/Dashboard.tsx` — 표시 방식
-
-- **AI 처방 위젯 최상단**에 `summary` 를 큰 글씨 한 줄 카드로 표시 (헤드라인 바로 아래).
-- 각 `Section` 컴포넌트에 `summary` prop을 추가해, 본문 위에 옅은 배경 한 줄 요약 박스를 렌더링.
-- 본문 텍스트의 `**...**` 마크업을 **`<strong>`** 으로 치환하는 작은 헬퍼(`renderBold(text)`) 추가. (정규식 한 줄, 외부 라이브러리 X)
-- 모든 처방 본문(modelDefinition / flow body / evaluationPoints / commonTraps / consultingScript)에 적용.
-
-### 3) 기존 정적 콘텐츠 (`TYPE_META`) 는 그대로 둠
-
-"기준 모델" 위젯(하단)은 연구자 본인이 작성한 검증된 콘텐츠이므로 손대지 않습니다. **AI 생성 위젯에만** 가독성 개선을 적용합니다.
-
----
-
-## 화면에서 보게 될 모습 (예시)
-
-```text
-🤖 AI 맞춤 처방전
-─────────────────────────────────
-[헤드라인]  AI 초안을 따져 묻는 수학 수업
-
-┌─────────────────────────────────┐
-│ 한 줄 요약                       │
-│ AI 답을 의심하고 다시 쓰는 연습. │
-└─────────────────────────────────┘
-
-📖 모델 정의
-  └ 요약: 학생이 AI 초안을 고쳐 쓴다.
-  본문:  AI에게 **초안**을 받고, 학생이
-         **틀린 부분을 표시**해 다시 묻습니다.
-         최종안은 **자기 말로** 적습니다.
-
-📋 수업 흐름
-  1단계 — 도입: ...
-  2단계 — 탐구: ...
-...
-```
-
----
+- AI 처방전 위젯 내부에서 `consultingScript` 카드(370~386줄)를 **아코디언 위쪽으로 이동**하여 "한 줄 요약" 바로 다음, 모델 정의보다 먼저 노출 → 컨설턴트가 가장 먼저 보게 함.
+- 카드 디자인 강화:
+  - 배경: `bg-blue-50 dark:bg-blue-950/30` 톤(옅은 파란색), 좌측 두꺼운 보더(`border-l-[6px] border-primary`) 유지
+  - 좌상단 `MessageSquareQuote` + "현장 스크립트" 라벨 뱃지
+  - 큰 따옴표(`”`) 장식 유지
+- **복사 버튼** (lucide `Copy` 아이콘):
+  - 위치: 카드 우상단 (`absolute top-3 right-3`)
+  - `Button variant="ghost" size="icon"`
+  - 클릭 시 `navigator.clipboard.writeText(consultingScript)` 후 `toast.success("현장 스크립트가 복사되었습니다!")` 호출
+  - `toast`는 `sonner` 에서 import (프로젝트에 이미 `<Toaster />` 마운트되어 있다고 가정; 없으면 `__root.tsx` 확인 후 추가)
+- 복사 성공 시 1.5초간 아이콘을 `Check`로 잠시 바꿔 시각적 피드백 추가.
 
 ## 기술 메모
 
-- 새 필드는 모두 `string` 옵셔널로 추가하고, AI가 누락하면 본문 첫 문장을 fallback 으로 사용 (`summary ?? extractFirstSentence(modelDefinition)`).
-- `sanitizeProductNames` 는 새 필드에도 동일 적용.
-- 굵게 처리 헬퍼는 XSS 안전한 분할 렌더(`split`→`map`) 방식, `dangerouslySetInnerHTML` 사용 안 함.
-- 모델은 현행 `google/gemini-2.5-flash` 유지 (요약 필드 추가만으로 충분).
+- 수정 파일: **`src/components/consult/Dashboard.tsx` 단일 파일**.
+- 신규 import: `Accordion, AccordionItem, AccordionTrigger, AccordionContent`, `Copy`, `Check`, `toast` (from `sonner`), `useState`.
+- 삭제할 import: `ArrowRight` (다음 단계 박스 제거), `STAGES` 상수.
+- 백엔드(서버 함수, 프롬프트, 스키마)는 **변경 없음** — 순수 프론트엔드 작업.
+- `<Toaster />` 마운트 여부를 `src/routes/__root.tsx`에서 1회 확인하고, 없으면 추가하는 것까지 작업 범위에 포함.
 
-승인하시면 바로 적용합니다.
+작업 후 미리보기에서 모바일 폭(390px 가정)으로 스크롤 길이가 줄었는지, 아코디언이 부드럽게 열리는지, 복사 토스트가 정상 동작하는지 확인.
