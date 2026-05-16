@@ -32,6 +32,7 @@ const DIFF_LABEL: Record<string, string> = {
   burnout: "에듀테크 번아웃형",
   pbl: "PBL 평가 실종형",
   fragmented: "데이터 파편화형",
+  other: "기타",
 };
 const EVAL_LABEL: Record<string, string> = {
   grading: "채점 시간 경감", feedback: "맞춤형 피드백",
