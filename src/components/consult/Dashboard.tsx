@@ -592,3 +592,80 @@ function ScriptCard({ script }: { script: string }) {
     </div>
   );
 }
+
+function TypeGuideCard({ guide }: { guide: TypeGuide }) {
+  return (
+    <div
+      className={`mt-5 rounded-2xl border-l-4 ${guide.accentBorder} ${guide.accentBg} p-5 space-y-5`}
+    >
+      <h4 className="text-lg font-bold text-foreground leading-snug">
+        “{guide.headline}”
+      </h4>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Users className="w-3.5 h-3.5" />}
+        label="대상 학교"
+      >
+        <p className="text-[14px] leading-relaxed text-foreground/85">{guide.target}</p>
+      </GuideRow>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Quote className="w-3.5 h-3.5" />}
+        label={`수업 철학 — ${guide.philosophyTitle}`}
+      >
+        <blockquote
+          className={`border-l-2 ${guide.quoteBorder} pl-3 italic text-[15px] leading-relaxed text-foreground/90`}
+        >
+          “{guide.philosophyQuote}”
+        </blockquote>
+      </GuideRow>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Compass className="w-3.5 h-3.5" />}
+        label="평가 혁신 방향"
+      >
+        <p className="text-[14px] leading-relaxed text-foreground/85">{guide.direction}</p>
+      </GuideRow>
+
+      <div className="flex flex-wrap gap-1.5 pt-1">
+        {guide.keywords.map((kw) => (
+          <Badge
+            key={kw}
+            variant="secondary"
+            className="rounded-full text-[12px] font-medium px-2.5 py-0.5"
+          >
+            #{kw}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GuideRow({
+  accentText,
+  icon,
+  label,
+  children,
+}: {
+  accentText: string;
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div
+        className={`flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase ${accentText}`}
+      >
+        {icon}
+        <span>{label}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
