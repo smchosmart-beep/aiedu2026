@@ -1,9 +1,12 @@
-## 변경 사항
+## 삭제 대상
 
-`src/components/consult/Dashboard.tsx`의 "학교 응답 정보" 위젯에서 `공유 코드` 필드 한 줄(63번 라인)을 제거합니다.
+PIN 기능 도입 전 기록(pin_hash가 비어있는 행) 1건을 `consultations` 테이블에서 삭제합니다.
 
-- 상단 헤더 우측에 이미 동일한 코드가 표시되고 있어 중복입니다.
-- 이후 "제출 일시"가 첫 칸이 되며, 2열 그리드는 그대로 유지됩니다.
-- 헤더의 코드 표시, 내부 로직(`data.code` 전달, `ConsultationPanel surveyCode`)은 변경하지 않습니다.
+- 김승현, 2026-05-16 10:55:07 (id: 84bf46ea…)
 
-다른 화면(상단 헤더, 컨설팅 패널 연결 등)은 건드리지 않습니다.
+PIN이 설정된 이후 기록(1건)은 유지합니다.
+
+실행 SQL:
+```sql
+DELETE FROM consultations WHERE pin_hash = '';
+```
