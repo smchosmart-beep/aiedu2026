@@ -18,7 +18,7 @@ export function Landing() {
           </h1>
           <p className="text-muted-foreground mt-3">
             우리 학교 상황을 진단하고, 교사지원단의<br />
-            맞춤 처방을 받아보세요.
+            컨설팅을 받아보세요.
           </p>
         </motion.div>
 
