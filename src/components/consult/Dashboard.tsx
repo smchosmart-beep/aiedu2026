@@ -74,12 +74,10 @@ export function Dashboard({ data, onBack, readOnly = false }: Props) {
             <Field label="기기 운용 방식" value={MODE_LABEL[data.deviceMode]} />
             <Field label="에듀테크 계정 환경" value={ACCOUNT_LABEL[data.account]} />
             <Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />
-            <div className="sm:col-span-2">
-              <Field
-                label="사용중인 에듀테크"
-                value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"}
-              />
-            </div>
+            <Field
+              label="사용중인 에듀테크"
+              value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"}
+            />
           </div>
         </Widget>
 
