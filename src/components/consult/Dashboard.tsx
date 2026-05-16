@@ -16,12 +16,6 @@ const MODE_LABEL: Record<string, string> = {
 const ACCOUNT_LABEL: Record<string, string> = {
   personal: "개인 계정 완료", shared: "교사 공용 계정", none: "계정 발급 불가",
 };
-const SKILL_LABEL: Record<number, string> = {
-  1: "1단계 · 제시용",
-  2: "2단계 · 상호작용",
-  3: "3단계 · 코스웨어 활용",
-  4: "4단계 · 융합수업 설계",
-};
 const DIFF_LABEL: Record<string, string> = {
   courseware: "AI 코스웨어 매너리즘형",
   burnout: "에듀테크 번아웃형",
