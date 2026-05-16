@@ -108,6 +108,7 @@ export function SurveyFlow() {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
+      otherDifficulty: difficulties.includes("other") ? otherDifficulty.trim() : undefined,
       preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
