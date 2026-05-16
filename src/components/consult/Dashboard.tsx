@@ -292,14 +292,12 @@ export function Dashboard({ data, onBack }: Props) {
             />
             <Field label="기기 운용 방식" value={MODE_LABEL[data.deviceMode]} />
             <Field label="에듀테크 계정 환경" value={ACCOUNT_LABEL[data.account]} />
-            <Field label="교사 숙련도" value={data.skill.map((s) => SKILL_LABEL[s]).join(", ")} />
             <Field
               label="가장 큰 어려움"
               value={data.difficulties.map(diffLabel).join(", ") || "-"}
             />
             <Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />
-            <Field label="선호 에듀테크 도구" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />
-            <Field label="평가 혁신 목표" value={EVAL_LABEL[data.evalGoal]} />
+            <Field label="사용중인 에듀테크" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />
           </div>
         </details>
 
