@@ -28,8 +28,10 @@ const SKILL_LABEL: Record<number, string> = {
   4: "4단계 · 융합수업 설계",
 };
 const DIFF_LABEL: Record<string, string> = {
-  infra: "인프라 오류", admin: "행정 부담",
-  design: "수업 설계 갈증", account: "계정 관리",
+  courseware: "AI 코스웨어 매너리즘형",
+  burnout: "에듀테크 번아웃형",
+  pbl: "PBL 평가 실종형",
+  fragmented: "데이터 파편화형",
 };
 const EVAL_LABEL: Record<string, string> = {
   grading: "채점 시간 경감", feedback: "맞춤형 피드백",
