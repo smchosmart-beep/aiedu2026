@@ -20,7 +20,7 @@ export type SurveyResponse = {
   createdAt: number;
 };
 
-export type ConsultType = "A" | "A-B" | "B" | "B-C" | "C";
+export type ConsultType = "A" | "B" | "C";
 
 export type ClassifyResult = { type: ConsultType; score: number };
 
