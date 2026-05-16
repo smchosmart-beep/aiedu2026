@@ -16,22 +16,12 @@ const MODE_LABEL: Record<string, string> = {
 const ACCOUNT_LABEL: Record<string, string> = {
   personal: "개인 계정 완료", shared: "교사 공용 계정", none: "계정 발급 불가",
 };
-const SKILL_LABEL: Record<number, string> = {
-  1: "1단계 · 제시용",
-  2: "2단계 · 상호작용",
-  3: "3단계 · 코스웨어 활용",
-  4: "4단계 · 융합수업 설계",
-};
 const DIFF_LABEL: Record<string, string> = {
   courseware: "AI 코스웨어 매너리즘형",
   burnout: "에듀테크 번아웃형",
   pbl: "PBL 평가 실종형",
   fragmented: "데이터 파편화형",
   other: "기타",
-};
-const EVAL_LABEL: Record<string, string> = {
-  grading: "채점 시간 경감", feedback: "맞춤형 피드백",
-  inquiry: "비판적 탐구", agency: "학생 주체성 평가",
 };
 
 type TypeKey = "A" | "B" | "C";
@@ -292,14 +282,12 @@ export function Dashboard({ data, onBack }: Props) {
             />
             <Field label="기기 운용 방식" value={MODE_LABEL[data.deviceMode]} />
             <Field label="에듀테크 계정 환경" value={ACCOUNT_LABEL[data.account]} />
-            <Field label="교사 숙련도" value={data.skill.map((s) => SKILL_LABEL[s]).join(", ")} />
             <Field
               label="가장 큰 어려움"
               value={data.difficulties.map(diffLabel).join(", ") || "-"}
             />
             <Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />
-            <Field label="선호 에듀테크 도구" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />
-            <Field label="평가 혁신 목표" value={EVAL_LABEL[data.evalGoal]} />
+            <Field label="사용중인 에듀테크" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />
           </div>
         </details>
 

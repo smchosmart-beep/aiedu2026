@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { REGIONS, type SurveyResponse, type DeviceOS, type DeviceMode, type Account, type Skill, type Difficulty, type EvalGoal } from "@/lib/types";
+import { REGIONS, type SurveyResponse, type DeviceOS, type DeviceMode, type Account, type Difficulty } from "@/lib/types";
 import { generateCode, saveResponse } from "@/lib/storage";
 
 const TOTAL = 5;
@@ -31,24 +31,12 @@ const ACCOUNT_OPTIONS: { v: Account; label: string; desc: string }[] = [
   { v: "shared", label: "교사 공용 계정", desc: "교사가 대표 계정으로 운용" },
   { v: "none", label: "계정 발급 불가", desc: "보호자 동의 등 미해결" },
 ];
-const SKILL_OPTIONS: { v: Skill; label: string; desc: string }[] = [
-  { v: 1, label: "1단계 · 제시용", desc: "수업 자료 제시 위주" },
-  { v: 2, label: "2단계 · 상호작용", desc: "학생 응답·퀴즈 활용" },
-  { v: 3, label: "3단계 · 코스웨어 활용", desc: "AI 코스웨어로 개별학습 운영" },
-  { v: 4, label: "4단계 · 융합수업 설계", desc: "AI를 통합한 수업 직접 설계" },
-];
 const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
   { v: "courseware", label: "AI 코스웨어 매너리즘형", desc: "“AI 문제집만 풀려요”" },
   { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
   { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
   { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
   { v: "other", label: "기타", desc: "직접 입력해 주세요" },
-];
-const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
-  { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
-  { v: "feedback", label: "2. 맞춤형 피드백", desc: "개별 학생 진단·처방" },
-  { v: "inquiry", label: "3. 비판적 탐구", desc: "AI 응답을 검증·논쟁" },
-  { v: "agency", label: "4. 학생 주체성 평가", desc: "AI를 도구로 한 창의적 산출" },
 ];
 
 const variants = {
@@ -66,9 +54,6 @@ export function SurveyFlow() {
   const [deviceOS, setDeviceOS] = useState<DeviceOS[]>([]);
   const [deviceMode, setDeviceMode] = useState<DeviceMode | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
-  const [skill, setSkill] = useState<Skill[]>([]);
-  const toggleSkill = (v: Skill) =>
-    setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
   const [otherDifficulty, setOtherDifficulty] = useState("");
   const [preferredTools, setPreferredTools] = useState<string[]>([]);
@@ -86,7 +71,6 @@ export function SurveyFlow() {
   };
   const removeTool = (v: string) =>
     setPreferredTools((p) => p.filter((x) => x !== v));
-  const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
   const [targetSubject, setTargetSubject] = useState("");
 
   const toggleOS = (v: DeviceOS) =>
@@ -112,10 +96,10 @@ export function SurveyFlow() {
     const r: SurveyResponse = {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
-      skill, difficulties,
+      skill: [], difficulties,
       otherDifficulty: difficulties.includes("other") ? otherDifficulty.trim() : undefined,
       difficultyDetail: difficultyDetail.trim() || undefined,
-      preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
+      preferredTools, evalGoal: "feedback", targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
     try {
@@ -134,8 +118,8 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return skill.length > 0 && difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
-      case 4: return preferredTools.length > 0 && !!evalGoal && targetSubject.trim().length > 0;
+      case 3: return difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
+      case 4: return preferredTools.length > 0 && targetSubject.trim().length > 0;
       default: return false;
     }
   })();
@@ -155,8 +139,8 @@ export function SurveyFlow() {
         "처방의 기준이 되는 기본 정보예요",
         "사용 중인 OS와 운용 방식을 모두 골라주세요",
         "학생 계정 발급 상태를 골라주세요",
-        "현재 숙련도와 수업 평가 고민",
-        "주로 쓰는 도구와 평가 혁신 방향",
+        "수업 평가 고민",
+        "주로 쓰는 도구와 평가 혁신 과목",
       ][step]}
       onBack={step > 0 ? back : undefined}
       onNext={step === TOTAL - 1 ? submit : next}
@@ -228,12 +212,6 @@ export function SurveyFlow() {
 
           {step === 3 && (
             <>
-              <Section label={`교사 숙련도 (다중 선택 · ${skill.length}개)`}>
-                {SKILL_OPTIONS.map((o) => (
-                  <ChoiceCard key={o.v} title={o.label} description={o.desc}
-                    selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
-                ))}
-              </Section>
               <Section label={`수업 평가 고민 (1개 이상 · ${difficulties.length}개)`}>
                 {DIFF_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
@@ -277,7 +255,7 @@ export function SurveyFlow() {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  선호 에듀테크 도구 ({preferredTools.length}개)
+                  사용중인 에듀테크 ({preferredTools.length}개)
                 </label>
                 <div className="mt-2 flex gap-2">
                   <Input
@@ -321,12 +299,6 @@ export function SurveyFlow() {
                   </div>
                 )}
               </div>
-              <Section label="평가 혁신 목표 (1개)">
-                {EVAL_OPTIONS.map((o) => (
-                  <ChoiceCard key={o.v} title={o.label} description={o.desc}
-                    selected={evalGoal === o.v} onClick={() => setEvalGoal(o.v)} />
-                ))}
-              </Section>
             </>
           )}
         </motion.div>

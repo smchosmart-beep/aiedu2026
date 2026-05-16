@@ -7,13 +7,7 @@ export function classify(r: SurveyResponse): ClassifyResult {
   // 신호 1: 계정 환경 (0~1)
   const accountScore = r.account === "personal" ? 1 : r.account === "shared" ? 0.5 : 0;
 
-  // 신호 2: 숙련도 평균 1~4 → 0~3
-  const avgSkill = r.skill.length
-    ? r.skill.reduce((a, b) => a + b, 0) / r.skill.length
-    : 1;
-  const skillScore = Math.max(0, Math.min(3, avgSkill - 1));
-
-  // 신호 3: 수업 평가 고민 보정
+  // 신호 2: 수업 평가 고민 보정
   let adj = 0;
   const diffs = r.difficulties;
   const hasDeep = diffs.includes("pbl") || diffs.includes("fragmented");
@@ -21,7 +15,7 @@ export function classify(r: SurveyResponse): ClassifyResult {
   if (hasDeep) adj += 1;
   else if (onlyBurnout) adj -= 0.5;
 
-  const score = accountScore + skillScore + adj;
+  const score = accountScore + adj;
 
   let type: ClassifyResult["type"];
   if (score <= 1.5) type = "A";
