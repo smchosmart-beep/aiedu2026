@@ -1,15 +1,10 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check, Users, Quote, Compass } from "lucide-react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { toast } from "sonner";
+import { ChevronLeft, Target, Users, Quote, Compass } from "lucide-react";
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { generatePrescription } from "@/lib/prescription.functions";
+import { ConsultationPanel } from "./ConsultationPanel";
 
 const OS_LABEL: Record<string, string> = {
   chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
