@@ -60,7 +60,7 @@ export function Dashboard({ data, onBack, readOnly = false }: Props) {
 
         <Widget icon="📋" title="학교 응답 정보" delay={0.05}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-            <Field label="공유 코드" value={data.code} />
+            
             <Field
               label="제출 일시"
               value={new Date(data.createdAt).toLocaleString("ko-KR")}
