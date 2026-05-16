@@ -5,6 +5,7 @@ import { StepShell } from "./StepShell";
 import { ChoiceCard } from "./ChoiceCard";
 import { CompleteCard } from "./CompleteCard";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -102,18 +103,28 @@ export function SurveyFlow() {
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
 
-  const submit = () => {
+  const [submitting, setSubmitting] = useState(false);
+  const [difficultyDetail, setDifficultyDetail] = useState("");
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     const code = generateCode();
     const r: SurveyResponse = {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
       otherDifficulty: difficulties.includes("other") ? otherDifficulty.trim() : undefined,
+      difficultyDetail: difficultyDetail.trim() || undefined,
       preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
-    saveResponse(r);
-    setDone(code);
+    try {
+      await saveResponse(r);
+      setDone(r.code);
+    } catch (e) {
+      toast.error((e as Error).message || "저장에 실패했습니다");
+      setSubmitting(false);
+    }
   };
 
   if (done) return <CompleteCard code={done} schoolName={schoolName} />;
@@ -236,6 +247,17 @@ export function SurveyFlow() {
                     className="mt-2 h-14 rounded-2xl text-base"
                   />
                 )}
+                <div className="pt-2">
+                  <label className="text-sm font-medium text-muted-foreground">
+                    고민 세부 내용 (선택 사항 · 직접 서술)
+                  </label>
+                  <Textarea
+                    value={difficultyDetail}
+                    onChange={(e) => setDifficultyDetail(e.target.value)}
+                    placeholder="예) AI 코스웨어를 도입했지만 학생들이 단순 문제풀이만 반복하고, 수업 후 데이터를 어떻게 해석해 다음 차시에 반영할지 막막합니다."
+                    className="mt-2 min-h-[120px] rounded-2xl text-base leading-relaxed"
+                  />
+                </div>
               </Section>
             </>
           )}
