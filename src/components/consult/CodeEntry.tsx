@@ -2,28 +2,47 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PencilLine, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { getResponse } from "@/lib/storage";
+import { findResponsesBySchool } from "@/lib/storage";
+import { REGIONS } from "@/lib/types";
 import type { SurveyResponse } from "@/lib/types";
 import { Dashboard } from "./Dashboard";
 
 export function CodeEntry() {
-  const [code, setCode] = useState("");
-  const [data, setData] = useState<SurveyResponse | null>(null);
+  const [region, setRegion] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [results, setResults] = useState<SurveyResponse[] | null>(null);
+  const [selected, setSelected] = useState<SurveyResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (!region || !schoolName.trim()) {
+      toast.error("지역과 학교명을 입력하세요");
+      return;
+    }
     setLoading(true);
     try {
-      const r = await getResponse(code);
-      if (!r) {
-        toast.error("유효하지 않은 코드입니다");
+      const list = await findResponsesBySchool(region, schoolName);
+      if (list.length === 0) {
+        toast.error("일치하는 학교 응답이 없습니다");
+        setResults([]);
         return;
       }
-      setData(r);
+      if (list.length === 1) {
+        setSelected(list[0]);
+        return;
+      }
+      setResults(list);
     } catch (err) {
       toast.error((err as Error).message || "조회에 실패했습니다");
     } finally {
@@ -31,7 +50,8 @@ export function CodeEntry() {
     }
   };
 
-  if (data) return <Dashboard data={data} onBack={() => setData(null)} />;
+  if (selected)
+    return <Dashboard data={selected} onBack={() => setSelected(null)} />;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -40,41 +60,78 @@ export function CodeEntry() {
           <Link to="/" className="p-1 -ml-1 rounded-full hover:bg-muted">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <div className="font-semibold">공유 코드 조회</div>
+          <div className="font-semibold">컨설팅 학교 찾기</div>
         </div>
       </div>
 
-      <div className="flex-1 max-w-md w-full mx-auto px-5 pt-16">
+      <div className="flex-1 max-w-md w-full mx-auto px-5 pt-12 pb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-            <Search className="w-6 h-6" />
+            <PencilLine className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold">공유 코드를 입력하세요</h1>
+          <h1 className="text-2xl font-bold">학교 응답 찾기</h1>
           <p className="text-muted-foreground mt-2">
-            선도학교에서 받은 6자리 코드를 입력하면<br />맞춤 처방이 나타납니다
+            지역과 학교명을 입력해 응답을 찾고<br />컨설팅 내용을 기록하세요
           </p>
 
           <form onSubmit={submit} className="mt-8 space-y-4">
-            <Input
-              autoFocus
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="6자리 코드 입력"
-              maxLength={6}
-              className="h-16 text-center text-2xl tracking-[0.5em] font-mono rounded-2xl"
-            />
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">지역</label>
+              <Select value={region} onValueChange={setRegion}>
+                <SelectTrigger className="mt-2 h-14 rounded-2xl text-base">
+                  <SelectValue placeholder="시도를 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {REGIONS.map((r) => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">학교명</label>
+              <Input
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+                placeholder="예) 00초등학교"
+                className="mt-2 h-14 rounded-2xl text-base"
+              />
+            </div>
             <Button
               type="submit"
               size="lg"
-              disabled={code.length < 4 || loading}
+              disabled={loading}
               className="w-full h-14 rounded-2xl text-base"
             >
-              {loading ? "조회 중…" : "컨설팅 기록 보기"}
+              {loading ? "조회 중…" : "찾기"}
             </Button>
           </form>
+
+          {results && results.length > 1 && (
+            <div className="mt-8 space-y-3">
+              <div className="text-sm text-muted-foreground">
+                총 {results.length}건의 응답이 있습니다
+              </div>
+              {results.map((r) => (
+                <button
+                  key={r.code}
+                  onClick={() => setSelected(r)}
+                  className="w-full text-left p-4 rounded-2xl border bg-card hover:bg-muted/50 transition flex items-center justify-between"
+                >
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{r.schoolName}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {r.region} · {new Date(r.createdAt).toLocaleString("ko-KR")}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 ml-3" />
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
