@@ -212,12 +212,6 @@ export function SurveyFlow() {
 
           {step === 3 && (
             <>
-              <Section label={`교사 숙련도 (다중 선택 · ${skill.length}개)`}>
-                {SKILL_OPTIONS.map((o) => (
-                  <ChoiceCard key={o.v} title={o.label} description={o.desc}
-                    selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
-                ))}
-              </Section>
               <Section label={`수업 평가 고민 (1개 이상 · ${difficulties.length}개)`}>
                 {DIFF_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
