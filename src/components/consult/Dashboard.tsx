@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw } from "lucide-react";
+import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check } from "lucide-react";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { toast } from "sonner";
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
 import { useQuery } from "@tanstack/react-query";
