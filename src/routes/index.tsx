@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "2026 AI·디지털 활용 선도학교 수업 평가 혁신 컨설팅" },
+      { title: "2026 AI·디지털 활용 선도학교 교사지원단 컨설팅" },
       { name: "description", content: "선도학교의 상황을 진단하고 교사지원단에게 동적 처방을 제공합니다." },
     ],
   }),

@@ -55,7 +55,7 @@ export function Dashboard({ data, onBack, readOnly = false }: Props) {
             <Badge variant="secondary" className="rounded-full">{data.region}</Badge>
             <span className="text-2xl font-bold">{data.schoolName}</span>
           </div>
-          <p className="text-muted-foreground mt-1">수업 평가 혁신 컨설팅 결과</p>
+          <p className="text-muted-foreground mt-1">교사지원단 컨설팅 결과</p>
         </motion.div>
 
         <Widget icon="📋" title="학교 응답 정보" delay={0.05}>
