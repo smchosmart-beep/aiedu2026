@@ -69,6 +69,7 @@ export function SurveyFlow() {
   const toggleSkill = (v: Skill) =>
     setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
+  const [otherDifficulty, setOtherDifficulty] = useState("");
   const [preferredTools, setPreferredTools] = useState<string[]>([]);
   const [toolDraft, setToolDraft] = useState("");
   const addTool = () => {
