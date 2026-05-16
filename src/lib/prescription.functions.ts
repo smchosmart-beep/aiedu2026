@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const InputSchema = z.object({
-  type: z.enum(["A", "A-B", "B", "B-C", "C"]),
+  type: z.enum(["A", "B", "C"]),
   typeLabel: z.string(),
   subject: z.string(),
   tools: z.array(z.string()),
