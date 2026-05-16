@@ -23,10 +23,6 @@ const DIFF_LABEL: Record<string, string> = {
   fragmented: "데이터 파편화형",
   other: "기타",
 };
-const EVAL_LABEL: Record<string, string> = {
-  grading: "채점 시간 경감", feedback: "맞춤형 피드백",
-  inquiry: "비판적 탐구", agency: "학생 주체성 평가",
-};
 
 type TypeKey = "A" | "B" | "C";
 
