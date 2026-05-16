@@ -54,9 +54,6 @@ export function SurveyFlow() {
   const [deviceOS, setDeviceOS] = useState<DeviceOS[]>([]);
   const [deviceMode, setDeviceMode] = useState<DeviceMode | null>(null);
   const [account, setAccount] = useState<Account | null>(null);
-  const [skill, setSkill] = useState<Skill[]>([]);
-  const toggleSkill = (v: Skill) =>
-    setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
   const [otherDifficulty, setOtherDifficulty] = useState("");
   const [preferredTools, setPreferredTools] = useState<string[]>([]);
@@ -74,7 +71,6 @@ export function SurveyFlow() {
   };
   const removeTool = (v: string) =>
     setPreferredTools((p) => p.filter((x) => x !== v));
-  const [evalGoal, setEvalGoal] = useState<EvalGoal | null>(null);
   const [targetSubject, setTargetSubject] = useState("");
 
   const toggleOS = (v: DeviceOS) =>
