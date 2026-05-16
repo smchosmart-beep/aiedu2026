@@ -106,6 +106,15 @@ export async function findResponsesBySchool(
   return (data ?? []).map((r) => rowToResponse(r as Row));
 }
 
+export async function listAllResponses(): Promise<SurveyResponse[]> {
+  const { data, error } = await supabase
+    .from("surveys")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => rowToResponse(r as Row));
+}
+
 export function seedIfNeeded() {
   // no-op
 }
