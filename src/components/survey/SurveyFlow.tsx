@@ -299,12 +299,6 @@ export function SurveyFlow() {
                   </div>
                 )}
               </div>
-              <Section label="평가 혁신 목표 (1개)">
-                {EVAL_OPTIONS.map((o) => (
-                  <ChoiceCard key={o.v} title={o.label} description={o.desc}
-                    selected={evalGoal === o.v} onClick={() => setEvalGoal(o.v)} />
-                ))}
-              </Section>
             </>
           )}
         </motion.div>
