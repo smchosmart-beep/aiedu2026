@@ -41,6 +41,7 @@ const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
   { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
   { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
   { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
+  { v: "other", label: "기타", desc: "직접 입력해 주세요" },
 ];
 const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
   { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
