@@ -1,7 +1,18 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Home } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Props = {
   step: number;
@@ -20,11 +31,7 @@ export function StepShell({
 }: Props) {
   const progress = ((step + 1) / total) * 100;
   const navigate = useNavigate();
-  const goHome = () => {
-    if (window.confirm("진단을 중단하고 홈으로 돌아갈까요? 입력한 내용은 저장되지 않아요.")) {
-      navigate({ to: "/" });
-    }
-  };
+  const [confirmOpen, setConfirmOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
       <div className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b">
@@ -45,11 +52,24 @@ export function StepShell({
           <div className="text-xs text-muted-foreground tabular-nums w-8 text-right">
             {step + 1}/{total}
           </div>
-          <button onClick={goHome} className="p-1 -mr-1 rounded-full hover:bg-muted" aria-label="홈으로">
+          <button onClick={() => setConfirmOpen(true)} className="p-1 -mr-1 rounded-full hover:bg-muted" aria-label="홈으로">
             <Home className="w-5 h-5" />
           </button>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>진단을 중단할까요?</AlertDialogTitle>
+            <AlertDialogDescription>입력한 내용은 저장되지 않아요.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={() => navigate({ to: "/" })}>확인</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex-1 max-w-xl w-full mx-auto px-5 pt-8 pb-32">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
