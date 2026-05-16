@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw } from "lucide-react";
+import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check } from "lucide-react";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { toast } from "sonner";
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
 import { useQuery } from "@tanstack/react-query";
@@ -200,14 +203,6 @@ const TYPE_META: Record<TypeKey, TypeContent> = {
   },
 };
 
-const STAGES: { key: TypeKey; label: string }[] = [
-  { key: "A", label: "A" },
-  { key: "A-B", label: "A-B" },
-  { key: "B", label: "B" },
-  { key: "B-C", label: "B-C" },
-  { key: "C", label: "C" },
-];
-
 type Props = { data: SurveyResponse; onBack: () => void };
 
 export function Dashboard({ data, onBack }: Props) {
@@ -293,7 +288,7 @@ export function Dashboard({ data, onBack }: Props) {
           )}
 
           {aiQuery.data && !aiQuery.isFetching && (
-            <div className="space-y-7">
+            <div className="space-y-5">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <p className="text-lg font-bold text-foreground leading-snug">
@@ -310,6 +305,10 @@ export function Dashboard({ data, onBack }: Props) {
                 </div>
               )}
 
+              {/* 현장 스크립트 - 가장 돋보이는 카드, 최우선 노출 */}
+              <ScriptCard script={aiQuery.data.consultingScript} />
+
+              {/* 모델 정의 - 짧고 핵심이라 항상 노출 */}
               <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의" summary={aiQuery.data.modelSummary}>
                 <div className="rounded-2xl bg-muted/40 px-4 py-3.5">
                   <p className="text-[15px] leading-7 text-foreground">
@@ -318,72 +317,84 @@ export function Dashboard({ data, onBack }: Props) {
                 </div>
               </Section>
 
-              <Section icon={<ListOrdered className="w-4 h-4" />} title="수업 흐름">
-                <ol className="relative space-y-3 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-px before:bg-border">
-                  {aiQuery.data.flow.map((s, i) => {
-                    const m = s.match(/^\s*([^:：]{1,20})[:：]\s*(.+)$/s);
-                    const label = m ? m[1].trim() : `${i + 1}단계`;
-                    const body = m ? m[2].trim() : s;
-                    return (
-                      <li key={i} className="relative flex gap-3 items-start">
-                        <span className="z-10 shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center shadow-sm">
-                          {i + 1}
-                        </span>
-                        <div className="flex-1 pt-0.5">
-                          <div className="text-[13px] font-semibold text-primary uppercase tracking-wide">
-                            {label}
-                          </div>
-                          <p className="mt-0.5 text-[15px] leading-7 text-foreground">
-                            {renderBold(body)}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </Section>
+              {/* 긴 본문 3종 - 아코디언으로 접어둠 */}
+              <Accordion type="multiple" className="space-y-2">
+                <AccordionItem value="flow" className="border rounded-2xl px-4 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <AccordionHead
+                      icon={<ListOrdered className="w-4 h-4" />}
+                      title="수업 흐름"
+                      summary={`${aiQuery.data.flow.length}단계로 구성된 1차시 흐름을 펼쳐 보세요`}
+                    />
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="relative space-y-3 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-px before:bg-border pt-2">
+                      {aiQuery.data.flow.map((s, i) => {
+                        const m = s.match(/^\s*([^:：]{1,20})[:：]\s*(.+)$/s);
+                        const label = m ? m[1].trim() : `${i + 1}단계`;
+                        const body = m ? m[2].trim() : s;
+                        return (
+                          <li key={i} className="relative flex gap-3 items-start">
+                            <span className="z-10 shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center shadow-sm">
+                              {i + 1}
+                            </span>
+                            <div className="flex-1 pt-0.5">
+                              <div className="text-[13px] font-semibold text-primary uppercase tracking-wide">
+                                {label}
+                              </div>
+                              <p className="mt-0.5 text-[15px] leading-7 text-foreground">
+                                {renderBold(body)}
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <Section icon={<CheckCircle2 className="w-4 h-4" />} title="평가 포인트" summary={aiQuery.data.evaluationSummary}>
-                <ul className="rounded-2xl border-l-4 border-emerald-500 bg-emerald-500/5 px-4 py-3 divide-y divide-dashed divide-emerald-500/20">
-                  {aiQuery.data.evaluationPoints.map((s, i) => (
-                    <li key={i} className="flex gap-2.5 py-2.5 first:pt-1 last:pb-1 text-[15px] leading-7 text-foreground">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1.5 shrink-0" />
-                      <span>{renderBold(s)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+                <AccordionItem value="eval" className="border rounded-2xl px-4 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <AccordionHead
+                      icon={<CheckCircle2 className="w-4 h-4" />}
+                      title="평가 포인트"
+                      summary={aiQuery.data.evaluationSummary ?? `${aiQuery.data.evaluationPoints.length}가지 평가 관점`}
+                    />
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="rounded-2xl border-l-4 border-emerald-500 bg-emerald-500/5 px-4 py-3 divide-y divide-dashed divide-emerald-500/20">
+                      {aiQuery.data.evaluationPoints.map((s, i) => (
+                        <li key={i} className="flex gap-2.5 py-2.5 first:pt-1 last:pb-1 text-[15px] leading-7 text-foreground">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1.5 shrink-0" />
+                          <span>{renderBold(s)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <Section icon={<AlertTriangle className="w-4 h-4" />} title="흔한 함정" summary={aiQuery.data.trapsSummary}>
-                <ul className="space-y-2.5 rounded-2xl border-l-4 border-amber-500 bg-amber-500/5 p-4">
-                  {aiQuery.data.commonTraps.map((s, i) => (
-                    <li key={i} className="flex gap-3 items-start text-[15px] leading-7 text-foreground">
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold flex items-center justify-center mt-0.5">
-                        {i + 1}
-                      </span>
-                      <span>{renderBold(s)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-
-              <div className="relative rounded-2xl border-l-[6px] border-primary bg-gradient-to-br from-primary/10 to-primary/[0.03] p-5 pt-6">
-                <span className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 shadow-sm">
-                  <MessageSquareQuote className="w-3 h-3" />
-                  현장 화법
-                </span>
-                <span className="absolute top-2 right-3 text-5xl leading-none text-primary/20 font-serif select-none">”</span>
-                <div className="space-y-2.5">
-                  {aiQuery.data.consultingScript
-                    .split(/(?<=[.?!。])\s+/)
-                    .filter(Boolean)
-                    .map((sentence, i) => (
-                      <p key={i} className="text-foreground text-[15px] leading-7 font-medium">
-                        {renderBold(sentence)}
-                      </p>
-                    ))}
-                </div>
-              </div>
+                <AccordionItem value="traps" className="border rounded-2xl px-4 bg-card">
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <AccordionHead
+                      icon={<AlertTriangle className="w-4 h-4" />}
+                      title="흔한 함정"
+                      summary={aiQuery.data.trapsSummary ?? `${aiQuery.data.commonTraps.length}가지 주의사항`}
+                    />
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2.5 rounded-2xl border-l-4 border-amber-500 bg-amber-500/5 p-4">
+                      {aiQuery.data.commonTraps.map((s, i) => (
+                        <li key={i} className="flex gap-3 items-start text-[15px] leading-7 text-foreground">
+                          <span className="shrink-0 w-6 h-6 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold flex items-center justify-center mt-0.5">
+                            {i + 1}
+                          </span>
+                          <span>{renderBold(s)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
 
               <div className="flex justify-end">
                 <Button size="sm" variant="ghost" onClick={() => aiQuery.refetch()}>
@@ -395,94 +406,17 @@ export function Dashboard({ data, onBack }: Props) {
           )}
         </Widget>
 
-        <Widget icon="🎯" title="핵심 수업·평가 모델 처방 (기준 모델)" delay={0.05}>
+        <Widget icon="🎯" title="기본 진단 결과" delay={0.05}>
           <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <Badge className="rounded-full bg-primary text-primary-foreground">
-              <Target className="w-3 h-3 mr-1" />
+            <Badge className="rounded-full bg-primary text-primary-foreground text-sm px-3 py-1">
+              <Target className="w-3.5 h-3.5 mr-1" />
               {typeMeta.label}
             </Badge>
-            <span className="text-xs text-muted-foreground font-mono">
+            <span className="text-xs text-muted-foreground font-mono ml-auto">
               점수 {score.toFixed(1)} / 5
             </span>
           </div>
-
-          <div className="mb-5">
-            <div className="flex items-center gap-1">
-              {STAGES.map((s) => {
-                const active = s.key === type;
-                return (
-                  <div key={s.key} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className={`w-full h-1.5 rounded-full ${
-                        active ? "bg-primary" : "bg-muted"
-                      }`}
-                    />
-                    <span
-                      className={`text-[10px] ${
-                        active ? "text-primary font-bold" : "text-muted-foreground"
-                      }`}
-                    >
-                      {s.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="text-sm font-semibold text-primary mb-1">{typeMeta.stage}</div>
-          <p className="text-foreground leading-relaxed mb-6">{typeMeta.oneLiner}</p>
-
-          <div className="space-y-5">
-            <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의">
-              <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.coreModel}</p>
-            </Section>
-
-            <Section icon={<ListOrdered className="w-4 h-4" />} title="1차시 운영 흐름">
-              <ol className="space-y-1.5 text-[15px] leading-relaxed text-foreground list-decimal pl-5 marker:text-primary marker:font-semibold">
-                {typeMeta.lessonFlow.map((s, i) => <li key={i}>{s}</li>)}
-              </ol>
-            </Section>
-
-            <Section icon={<CheckCircle2 className="w-4 h-4" />} title="평가 포인트">
-              <ul className="space-y-1.5">
-                {typeMeta.evalFocus.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-primary mt-1 shrink-0" />
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-
-            <Section icon={<AlertTriangle className="w-4 h-4" />} title="흔한 함정">
-              <ul className="space-y-1.5">
-                {typeMeta.pitfalls.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-foreground">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 mt-1 shrink-0" />
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-
-            <div className="rounded-2xl bg-primary/5 border border-primary/20 p-4 flex gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-              <div>
-                <div className="text-xs font-semibold text-primary mb-1">다음 단계</div>
-                <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.nextStep}</p>
-              </div>
-            </div>
-          </div>
-        </Widget>
-
-        <Widget icon="💬" title="현장 스크립트" delay={0.1}>
-          <div className="rounded-2xl bg-primary/5 border-l-4 border-primary p-5">
-            <MessageSquareQuote className="w-6 h-6 text-primary mb-2" />
-            <p className="text-foreground text-base leading-relaxed font-medium">
-              "{typeMeta.script}"
-            </p>
-          </div>
+          <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
         </Widget>
 
         <Widget icon="⚠️" title="현재 겪고 있는 어려움 (확인용)" delay={0.15}>
@@ -593,5 +527,66 @@ function renderBold(text: string): React.ReactNode {
     if (m) return <strong key={i} className="font-bold text-foreground">{m[1]}</strong>;
     return <span key={i}>{p}</span>;
   });
+}
+
+function AccordionHead({ icon, title, summary }: { icon: React.ReactNode; title: string; summary?: string }) {
+  return (
+    <div className="flex items-center gap-3 text-left flex-1 min-w-0">
+      <span className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+        {icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[14px] font-bold text-foreground">{title}</div>
+        {summary && (
+          <div className="text-[12px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
+            {summary}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScriptCard({ script }: { script: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(script);
+      setCopied(true);
+      toast.success("현장 스크립트가 복사되었습니다!");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("복사에 실패했습니다. 다시 시도해 주세요.");
+    }
+  };
+
+  const sentences = script.split(/(?<=[.?!。])\s+/).filter(Boolean);
+
+  return (
+    <div className="relative rounded-2xl border-l-[6px] border-primary bg-blue-50 dark:bg-blue-950/30 p-5 pt-7 shadow-sm">
+      <span className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 shadow-sm">
+        <MessageSquareQuote className="w-3 h-3" />
+        현장 스크립트
+      </span>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={onCopy}
+        aria-label="현장 스크립트 복사"
+        className="absolute top-2 right-2 h-8 w-8 text-primary hover:bg-primary/10"
+      >
+        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      </Button>
+      <span className="absolute top-1 right-12 text-5xl leading-none text-primary/20 font-serif select-none">”</span>
+      <div className="space-y-2.5 pr-8">
+        {sentences.map((s, i) => (
+          <p key={i} className="text-foreground text-[15px] leading-7 font-medium">
+            {renderBold(s)}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
 }
 
