@@ -44,7 +44,7 @@ export function Landing() {
             to="/view"
             tag="공개 · 누구나"
             title="컨설팅 결과 열람"
-            desc="지역과 학교명으로 우리 학교의 컨설팅 결과를 확인하세요"
+            desc="각 학교의 수업 컨설팅 결과를 확인하세요"
             icon={<Eye className="w-7 h-7" />}
             delay={0.3}
           />
