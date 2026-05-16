@@ -1,7 +1,18 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Home } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Props = {
   step: number;
@@ -20,11 +31,7 @@ export function StepShell({
 }: Props) {
   const progress = ((step + 1) / total) * 100;
   const navigate = useNavigate();
-  const goHome = () => {
-    if (window.confirm("진단을 중단하고 홈으로 돌아갈까요? 입력한 내용은 저장되지 않아요.")) {
-      navigate({ to: "/" });
-    }
-  };
+  const [confirmOpen, setConfirmOpen] = useState(false);
   return (
     <div className="min-h-screen flex flex-col">
       <div className="sticky top-0 z-10 bg-background/90 backdrop-blur border-b">
