@@ -255,7 +255,7 @@ export function SurveyFlow() {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  선호 에듀테크 도구 ({preferredTools.length}개)
+                  사용중인 에듀테크 ({preferredTools.length}개)
                 </label>
                 <div className="mt-2 flex gap-2">
                   <Input
