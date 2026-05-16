@@ -37,10 +37,10 @@ const SKILL_OPTIONS: { v: Skill; label: string; desc: string }[] = [
   { v: 4, label: "4단계 · 융합수업 설계", desc: "AI를 통합한 수업 직접 설계" },
 ];
 const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
-  { v: "infra", label: "인프라 오류", desc: "네트워크·기기 트러블" },
-  { v: "admin", label: "행정 부담", desc: "품의·구매·보고 부담" },
-  { v: "design", label: "수업 설계 갈증", desc: "AI 활용 수업 모델 부재" },
-  { v: "account", label: "계정 관리", desc: "로그인·동의서 관리 어려움" },
+  { v: "courseware", label: "AI 코스웨어 매너리즘형", desc: "“AI 문제집만 풀려요”" },
+  { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
+  { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
+  { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
 ];
 const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
   { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
