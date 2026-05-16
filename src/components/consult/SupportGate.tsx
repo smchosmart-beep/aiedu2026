@@ -49,7 +49,7 @@ export function SupportGate({ onUnlock }: Props) {
           </div>
           <h1 className="text-2xl font-bold">교사지원단 확인 코드</h1>
           <p className="text-muted-foreground mt-2">
-            B모드는 교사지원단 전용입니다.<br />
+            교사지원단 전용 화면입니다.<br />
             지원단 확인 코드를 입력해 주세요.
           </p>
 

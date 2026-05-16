@@ -11,10 +11,10 @@ export function Landing() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="text-xs font-semibold text-primary tracking-widest">
-            2026 AI·디지털 선도학교
+            2026 AI·디지털 활용 선도학교
           </div>
           <h1 className="text-3xl font-bold mt-2 leading-tight">
-            컨설팅<br />사전 진단
+            수업 평가 혁신<br />컨설팅
           </h1>
           <p className="text-muted-foreground mt-3">
             우리 학교 상황을 진단하고, 교사지원단의<br />
@@ -25,7 +25,7 @@ export function Landing() {
         <div className="mt-12 space-y-4">
           <Card
             to="/?mode=survey"
-            tag="A모드 · 선도학교 교사"
+            tag="선도학교 교사"
             title="진단 시작하기"
             desc="5단계 설문으로 우리 학교 환경을 진단합니다"
             icon={<ClipboardList className="w-7 h-7" />}
@@ -34,7 +34,7 @@ export function Landing() {
           />
           <Card
             to="/consult"
-            tag="B모드 · 교사지원단"
+            tag="교사지원단"
             title="컨설팅 기록하기"
             desc="6자리 코드로 학교를 찾아 컨설팅 내용을 기록하세요"
             icon={<PencilLine className="w-7 h-7" />}

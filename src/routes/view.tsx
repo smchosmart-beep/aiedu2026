@@ -9,7 +9,7 @@ export const Route = createFileRoute("/view")({
   component: ViewPage,
   head: () => ({
     meta: [
-      { title: "컨설팅 결과 열람 · 컨설팅 사전 진단" },
+      { title: "컨설팅 결과 열람 · 수업 평가 혁신 컨설팅" },
       {
         name: "description",
         content: "지역·학교명 또는 과목·학교급으로 컨설팅 결과를 누구나 열람할 수 있습니다.",

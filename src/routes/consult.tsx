@@ -8,7 +8,7 @@ export const Route = createFileRoute("/consult")({
   component: ConsultPage,
   head: () => ({
     meta: [
-      { title: "공유 코드 조회 · 컨설팅 사전 진단" },
+      { title: "공유 코드 조회 · 수업 평가 혁신 컨설팅" },
       { name: "description", content: "공유 코드를 입력해 맞춤 컨설팅 처방전을 확인하세요." },
     ],
   }),
