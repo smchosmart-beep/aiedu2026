@@ -26,7 +26,7 @@ async function fetchConsultations(code: string): Promise<Consultation[]> {
   return (data ?? []) as Consultation[];
 }
 
-export function ConsultationPanel({ surveyCode }: { surveyCode: string }) {
+export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode: string; readOnly?: boolean }) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
