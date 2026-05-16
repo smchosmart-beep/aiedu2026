@@ -17,7 +17,10 @@ import { REGIONS } from "@/lib/types";
 import type { SurveyResponse } from "@/lib/types";
 import { Dashboard } from "./Dashboard";
 
-export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
+export function CodeEntry({
+  readOnly = false,
+  embedded = false,
+}: { readOnly?: boolean; embedded?: boolean } = {}) {
   const [region, setRegion] = useState("");
   const [schoolName, setSchoolName] = useState("");
   const [results, setResults] = useState<SurveyResponse[] | null>(null);
@@ -54,19 +57,21 @@ export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
     return <Dashboard data={selected} onBack={() => setSelected(null)} readOnly={readOnly} />;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="border-b bg-background/90 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-xl mx-auto px-5 py-4 flex items-center gap-3">
-          <Link to="/" className="p-1 -ml-1 rounded-full hover:bg-muted">
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          <div className="font-semibold">
-            {readOnly ? "컨설팅 결과 열람" : "컨설팅 학교 찾기"}
+    <div className={embedded ? "flex flex-col" : "min-h-screen flex flex-col"}>
+      {!embedded && (
+        <div className="border-b bg-background/90 backdrop-blur sticky top-0 z-10">
+          <div className="max-w-xl mx-auto px-5 py-4 flex items-center gap-3">
+            <Link to="/" className="p-1 -ml-1 rounded-full hover:bg-muted">
+              <ChevronLeft className="w-6 h-6" />
+            </Link>
+            <div className="font-semibold">
+              {readOnly ? "컨설팅 결과 열람" : "컨설팅 학교 찾기"}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex-1 max-w-md w-full mx-auto px-5 pt-12 pb-12">
+      <div className={["flex-1 max-w-md w-full mx-auto px-5 pb-12", embedded ? "pt-6" : "pt-12"].join(" ")}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
