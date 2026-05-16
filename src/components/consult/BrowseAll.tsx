@@ -63,9 +63,9 @@ export function BrowseAll() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className="text-xl font-bold">전체 컨설팅 결과 둘러보기</h2>
+        <h2 className="text-xl font-bold">학교급·과목으로 찾기</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          학교급과 과목으로 필터링해 결과를 살펴보세요
+          학교급과 과목을 선택하면 결과가 표시됩니다
         </p>
       </motion.div>
 
@@ -100,7 +100,11 @@ export function BrowseAll() {
       </div>
 
       <div className="mt-6">
-        {isLoading ? (
+        {level === "all" && subject === "all" ? (
+          <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+            학교급 또는 과목을 선택하세요
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center">
             <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중…
           </div>
