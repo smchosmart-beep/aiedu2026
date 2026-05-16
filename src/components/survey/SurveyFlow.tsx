@@ -31,24 +31,12 @@ const ACCOUNT_OPTIONS: { v: Account; label: string; desc: string }[] = [
   { v: "shared", label: "교사 공용 계정", desc: "교사가 대표 계정으로 운용" },
   { v: "none", label: "계정 발급 불가", desc: "보호자 동의 등 미해결" },
 ];
-const SKILL_OPTIONS: { v: Skill; label: string; desc: string }[] = [
-  { v: 1, label: "1단계 · 제시용", desc: "수업 자료 제시 위주" },
-  { v: 2, label: "2단계 · 상호작용", desc: "학생 응답·퀴즈 활용" },
-  { v: 3, label: "3단계 · 코스웨어 활용", desc: "AI 코스웨어로 개별학습 운영" },
-  { v: 4, label: "4단계 · 융합수업 설계", desc: "AI를 통합한 수업 직접 설계" },
-];
 const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
   { v: "courseware", label: "AI 코스웨어 매너리즘형", desc: "“AI 문제집만 풀려요”" },
   { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
   { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
   { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
   { v: "other", label: "기타", desc: "직접 입력해 주세요" },
-];
-const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
-  { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
-  { v: "feedback", label: "2. 맞춤형 피드백", desc: "개별 학생 진단·처방" },
-  { v: "inquiry", label: "3. 비판적 탐구", desc: "AI 응답을 검증·논쟁" },
-  { v: "agency", label: "4. 학생 주체성 평가", desc: "AI를 도구로 한 창의적 산출" },
 ];
 
 const variants = {
