@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, Search, ArrowRight } from "lucide-react";
+import { ClipboardList, PencilLine, ArrowRight } from "lucide-react";
 
 export function Landing() {
   return (
@@ -35,9 +35,9 @@ export function Landing() {
           <Card
             to="/consult"
             tag="B모드 · 교사지원단"
-            title="공유 코드로 조회하기"
-            desc="6자리 코드로 맞춤 처방전을 확인하세요"
-            icon={<Search className="w-7 h-7" />}
+            title="컨설팅 기록하기"
+            desc="6자리 코드로 학교를 찾아 컨설팅 내용을 기록하세요"
+            icon={<PencilLine className="w-7 h-7" />}
             delay={0.2}
           />
         </div>
