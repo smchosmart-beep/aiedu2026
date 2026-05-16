@@ -37,10 +37,10 @@ const SKILL_OPTIONS: { v: Skill; label: string; desc: string }[] = [
   { v: 4, label: "4단계 · 융합수업 설계", desc: "AI를 통합한 수업 직접 설계" },
 ];
 const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
-  { v: "infra", label: "인프라 오류", desc: "네트워크·기기 트러블" },
-  { v: "admin", label: "행정 부담", desc: "품의·구매·보고 부담" },
-  { v: "design", label: "수업 설계 갈증", desc: "AI 활용 수업 모델 부재" },
-  { v: "account", label: "계정 관리", desc: "로그인·동의서 관리 어려움" },
+  { v: "courseware", label: "AI 코스웨어 매너리즘형", desc: "“AI 문제집만 풀려요”" },
+  { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
+  { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
+  { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
 ];
 const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
   { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
@@ -135,7 +135,7 @@ export function SurveyFlow() {
         "처방의 기준이 되는 기본 정보예요",
         "사용 중인 OS와 운용 방식을 모두 골라주세요",
         "학생 계정 발급 상태를 골라주세요",
-        "현재 숙련도와 가장 큰 어려움 2가지",
+        "현재 숙련도와 수업 평가 고민",
         "주로 쓰는 도구와 평가 혁신 방향",
       ][step]}
       onBack={step > 0 ? back : undefined}
@@ -214,7 +214,7 @@ export function SurveyFlow() {
                     selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
                 ))}
               </Section>
-              <Section label={`가장 큰 어려움 (1개 이상 · ${difficulties.length}개)`}>
+              <Section label={`수업 평가 고민 (1개 이상 · ${difficulties.length}개)`}>
                 {DIFF_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
                     selected={difficulties.includes(o.v)} onClick={() => toggleDiff(o.v)} />
