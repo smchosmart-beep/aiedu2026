@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Pencil, Send, Trash2, User } from "lucide-react";
+import { ExternalLink, Loader2, Pencil, Send, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ type Consultation = {
   survey_code: string;
   consultant_name: string;
   content: string;
+  link_url: string | null;
   created_at: string;
   pin_hash: string;
 };
@@ -34,17 +35,28 @@ type Consultation = {
 async function fetchConsultations(code: string): Promise<Consultation[]> {
   const { data, error } = await supabase
     .from("consultations")
-    .select("id, survey_code, consultant_name, content, created_at, pin_hash")
+    .select("id, survey_code, consultant_name, content, link_url, created_at, pin_hash")
     .eq("survey_code", code)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as Consultation[];
 }
 
+function safeHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+const isValidLink = (v: string) => v.length === 0 || /^https?:\/\/\S+$/i.test(v.trim());
+
 export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode: string; readOnly?: boolean }) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
   const [pin, setPin] = useState("");
 
   const createFn = useServerFn(createConsultation);
@@ -54,6 +66,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
   const [editTarget, setEditTarget] = useState<Consultation | null>(null);
   const [editName, setEditName] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editLinkUrl, setEditLinkUrl] = useState("");
   const [editPin, setEditPin] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState<Consultation | null>(null);
@@ -73,11 +86,13 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
           surveyCode,
           consultantName: name.trim(),
           content: content.trim(),
+          linkUrl: linkUrl.trim() || null,
           pin,
         },
       }),
     onSuccess: () => {
       setContent("");
+      setLinkUrl("");
       setPin("");
       invalidate();
       toast.success("컨설팅 기록이 저장되었습니다");
@@ -93,6 +108,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
           pin: editPin,
           consultantName: editName.trim(),
           content: editContent.trim(),
+          linkUrl: editLinkUrl.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -120,12 +136,14 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
     name.trim().length > 0 &&
     content.trim().length > 0 &&
     /^\d{4}$/.test(pin) &&
+    isValidLink(linkUrl) &&
     !create.isPending;
 
   const openEdit = (c: Consultation) => {
     setEditTarget(c);
     setEditName(c.consultant_name);
     setEditContent(c.content);
+    setEditLinkUrl(c.link_url ?? "");
     setEditPin("");
   };
 
@@ -161,6 +179,21 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
             className="min-h-[140px] rounded-xl leading-relaxed"
             maxLength={4000}
           />
+          <div className="space-y-1.5">
+            <Input
+              type="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="관련 링크 (선택) · 예: Canva 보기 전용 https://…"
+              className="h-12 rounded-xl"
+              maxLength={500}
+            />
+            {linkUrl.length > 0 && !isValidLink(linkUrl) && (
+              <p className="text-[11px] text-destructive px-1">
+                링크는 http:// 또는 https:// 로 시작해야 합니다.
+              </p>
+            )}
+          </div>
           <div className="space-y-1.5">
             <Input
               type="password"
@@ -208,6 +241,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
 
         {list?.map((c) => {
           const canModify = !readOnly && c.pin_hash !== "";
+          const host = c.link_url ? safeHostname(c.link_url) : null;
           return (
             <article
               key={c.id}
@@ -248,6 +282,22 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
               <p className="text-[15px] leading-7 text-foreground whitespace-pre-wrap">
                 {c.content}
               </p>
+              {c.link_url && (
+                <a
+                  href={c.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="inline-flex items-center gap-1.5 mt-1 px-3 py-2 rounded-xl border bg-background hover:bg-muted text-sm font-medium text-primary break-all"
+                >
+                  <ExternalLink className="w-4 h-4 shrink-0" />
+                  <span>첨부 링크 열기</span>
+                  {host && (
+                    <span className="text-xs text-muted-foreground font-normal">
+                      · {host}
+                    </span>
+                  )}
+                </a>
+              )}
             </article>
           );
         })}
@@ -275,6 +325,20 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
               className="min-h-[140px]"
               maxLength={4000}
             />
+            <div className="space-y-1.5">
+              <Input
+                type="url"
+                value={editLinkUrl}
+                onChange={(e) => setEditLinkUrl(e.target.value)}
+                placeholder="관련 링크 (선택) · 비우면 링크 제거"
+                maxLength={500}
+              />
+              {editLinkUrl.length > 0 && !isValidLink(editLinkUrl) && (
+                <p className="text-[11px] text-destructive px-1">
+                  링크는 http:// 또는 https:// 로 시작해야 합니다.
+                </p>
+              )}
+            </div>
             <Input
               type="password"
               inputMode="numeric"
@@ -294,7 +358,8 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
                 update.isPending ||
                 !/^\d{4}$/.test(editPin) ||
                 editName.trim().length === 0 ||
-                editContent.trim().length === 0
+                editContent.trim().length === 0 ||
+                !isValidLink(editLinkUrl)
               }
             >
               {update.isPending && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />}
