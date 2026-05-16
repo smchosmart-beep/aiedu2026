@@ -73,14 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "2026_ai_edu" },
+      { name: "description", content: "EduCoach AI diagnoses AI/digital readiness in schools and provides tailored consulting prescriptions." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "2026_ai_edu" },
+      { property: "og:description", content: "EduCoach AI diagnoses AI/digital readiness in schools and provides tailored consulting prescriptions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "2026_ai_edu" },
+      { name: "twitter:description", content: "EduCoach AI diagnoses AI/digital readiness in schools and provides tailored consulting prescriptions." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7aeb4c4e-9e09-43c7-ac78-9495f1dcf83f/id-preview-1127c45a--fd31e57d-f83a-4e91-b40b-57d2662cafd6.lovable.app-1778915250859.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7aeb4c4e-9e09-43c7-ac78-9495f1dcf83f/id-preview-1127c45a--fd31e57d-f83a-4e91-b40b-57d2662cafd6.lovable.app-1778915250859.png" },
     ],
     links: [
       {
