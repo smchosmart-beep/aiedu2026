@@ -51,7 +51,7 @@ export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
   };
 
   if (selected)
-    return <Dashboard data={selected} onBack={() => setSelected(null)} />;
+    return <Dashboard data={selected} onBack={() => setSelected(null)} readOnly={readOnly} />;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -60,7 +60,9 @@ export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
           <Link to="/" className="p-1 -ml-1 rounded-full hover:bg-muted">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <div className="font-semibold">컨설팅 학교 찾기</div>
+          <div className="font-semibold">
+            {readOnly ? "컨설팅 결과 열람" : "컨설팅 학교 찾기"}
+          </div>
         </div>
       </div>
 
@@ -72,9 +74,15 @@ export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
           <div className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
             <PencilLine className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold">학교 응답 찾기</h1>
+          <h1 className="text-2xl font-bold">
+            {readOnly ? "학교 결과 찾기" : "학교 응답 찾기"}
+          </h1>
           <p className="text-muted-foreground mt-2">
-            지역과 학교명을 입력해 응답을 찾고<br />컨설팅 내용을 기록하세요
+            {readOnly ? (
+              <>지역과 학교명을 입력해<br />컨설팅 결과를 열람하세요</>
+            ) : (
+              <>지역과 학교명을 입력해 응답을 찾고<br />컨설팅 내용을 기록하세요</>
+            )}
           </p>
 
           <form onSubmit={submit} className="mt-8 space-y-4">
