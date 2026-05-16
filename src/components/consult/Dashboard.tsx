@@ -104,7 +104,7 @@ export function Dashboard({ data, onBack }: Props) {
 
         <div className="pt-4">
           <Button variant="outline" onClick={onBack} className="w-full h-12 rounded-2xl">
-            다른 코드 조회하기
+            뒤로 가기
           </Button>
         </div>
       </div>
