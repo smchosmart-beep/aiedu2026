@@ -32,6 +32,7 @@ const DIFF_LABEL: Record<string, string> = {
   burnout: "에듀테크 번아웃형",
   pbl: "PBL 평가 실종형",
   fragmented: "데이터 파편화형",
+  other: "기타",
 };
 const EVAL_LABEL: Record<string, string> = {
   grading: "채점 시간 경감", feedback: "맞춤형 피드백",
@@ -212,7 +213,9 @@ export function Dashboard({ data, onBack }: Props) {
   const { type, score } = classify(data);
   const typeMeta = TYPE_META[type];
 
-  const difficultyBadges = data.difficulties.map((d) => DIFF_LABEL[d]);
+  const diffLabel = (d: string) =>
+    d === "other" ? (data.otherDifficulty?.trim() || "기타") : (DIFF_LABEL[d] ?? d);
+  const difficultyBadges = data.difficulties.map(diffLabel);
   if (data.account === "none") difficultyBadges.push("계정 발급 불가");
   else if (data.account === "shared") difficultyBadges.push("교사 공용 계정");
 
@@ -226,7 +229,7 @@ export function Dashboard({ data, onBack }: Props) {
           typeLabel: typeMeta.label,
           subject: data.targetSubject ?? "",
           tools: data.preferredTools ?? [],
-          difficulties: (data.difficulties ?? []).map((d) => DIFF_LABEL[d] ?? d),
+          difficulties: (data.difficulties ?? []).map(diffLabel),
           evalGoal: EVAL_LABEL[data.evalGoal] ?? data.evalGoal,
           schoolName: data.schoolName,
           region: data.region,
@@ -460,7 +463,7 @@ export function Dashboard({ data, onBack }: Props) {
             <Field label="교사 숙련도" value={data.skill.map((s) => SKILL_LABEL[s]).join(", ")} />
             <Field
               label="가장 큰 어려움"
-              value={data.difficulties.map((v) => DIFF_LABEL[v]).join(", ") || "-"}
+              value={data.difficulties.map(diffLabel).join(", ") || "-"}
             />
             <Field label="평가 혁신 대상 과목" value={data.targetSubject || "-"} />
             <Field label="선호 에듀테크 도구" value={data.preferredTools?.length ? data.preferredTools.join(", ") : "-"} />

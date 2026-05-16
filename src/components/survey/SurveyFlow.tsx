@@ -41,6 +41,7 @@ const DIFF_OPTIONS: { v: Difficulty; label: string; desc: string }[] = [
   { v: "burnout", label: "에듀테크 번아웃형", desc: "“새로운 도구 배우기 지쳤어요”" },
   { v: "pbl", label: "PBL 평가 실종형", desc: "“활동은 화려한데 평가는 주관적이에요”" },
   { v: "fragmented", label: "데이터 파편화형", desc: "“앱은 10개 쓰는데 남는 데이터가 없어요”" },
+  { v: "other", label: "기타", desc: "직접 입력해 주세요" },
 ];
 const EVAL_OPTIONS: { v: EvalGoal; label: string; desc: string }[] = [
   { v: "grading", label: "1. 채점 시간 경감", desc: "자동 채점·통계" },
@@ -68,6 +69,7 @@ export function SurveyFlow() {
   const toggleSkill = (v: Skill) =>
     setSkill((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const [difficulties, setDifficulties] = useState<Difficulty[]>([]);
+  const [otherDifficulty, setOtherDifficulty] = useState("");
   const [preferredTools, setPreferredTools] = useState<string[]>([]);
   const [toolDraft, setToolDraft] = useState("");
   const addTool = () => {
@@ -89,7 +91,13 @@ export function SurveyFlow() {
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const toggleDiff = (v: Difficulty) =>
-    setDifficulties((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
+    setDifficulties((p) => {
+      if (p.includes(v)) {
+        if (v === "other") setOtherDifficulty("");
+        return p.filter((x) => x !== v);
+      }
+      return [...p, v];
+    });
 
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -100,6 +108,7 @@ export function SurveyFlow() {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
       skill, difficulties,
+      otherDifficulty: difficulties.includes("other") ? otherDifficulty.trim() : undefined,
       preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
@@ -114,7 +123,7 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return skill.length > 0 && difficulties.length >= 1;
+      case 3: return skill.length > 0 && difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
       case 4: return preferredTools.length > 0 && !!evalGoal && targetSubject.trim().length > 0;
       default: return false;
     }
@@ -219,6 +228,14 @@ export function SurveyFlow() {
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
                     selected={difficulties.includes(o.v)} onClick={() => toggleDiff(o.v)} />
                 ))}
+                {difficulties.includes("other") && (
+                  <Input
+                    value={otherDifficulty}
+                    onChange={(e) => setOtherDifficulty(e.target.value)}
+                    placeholder="기타 고민을 입력해 주세요"
+                    className="mt-2 h-14 rounded-2xl text-base"
+                  />
+                )}
               </Section>
             </>
           )}
