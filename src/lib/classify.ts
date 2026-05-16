@@ -26,10 +26,8 @@ export function classify(r: SurveyResponse): ClassifyResult {
   const score = accountScore + skillScore + adj;
 
   let type: ClassifyResult["type"];
-  if (score <= 1.0) type = "A";
-  else if (score <= 2.0) type = "A-B";
-  else if (score <= 3.0) type = "B";
-  else if (score <= 4.0) type = "B-C";
+  if (score <= 1.5) type = "A";
+  else if (score <= 3.5) type = "B";
   else type = "C";
 
   return { type, score };
