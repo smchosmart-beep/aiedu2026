@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { REGIONS, type SurveyResponse, type DeviceOS, type DeviceMode, type Account, type Skill, type Difficulty, type EvalGoal } from "@/lib/types";
+import { REGIONS, type SurveyResponse, type DeviceOS, type DeviceMode, type Account, type Difficulty } from "@/lib/types";
 import { generateCode, saveResponse } from "@/lib/storage";
 
 const TOTAL = 5;
