@@ -96,10 +96,10 @@ export function SurveyFlow() {
     const r: SurveyResponse = {
       code, region, schoolName,
       deviceOS, deviceMode: deviceMode!, account: account!,
-      skill, difficulties,
+      skill: [], difficulties,
       otherDifficulty: difficulties.includes("other") ? otherDifficulty.trim() : undefined,
       difficultyDetail: difficultyDetail.trim() || undefined,
-      preferredTools, evalGoal: evalGoal!, targetSubject: targetSubject.trim(),
+      preferredTools, evalGoal: "feedback", targetSubject: targetSubject.trim(),
       createdAt: Date.now(),
     };
     try {
@@ -118,8 +118,8 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return skill.length > 0 && difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
-      case 4: return preferredTools.length > 0 && !!evalGoal && targetSubject.trim().length > 0;
+      case 3: return difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
+      case 4: return preferredTools.length > 0 && targetSubject.trim().length > 0;
       default: return false;
     }
   })();
