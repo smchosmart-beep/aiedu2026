@@ -214,7 +214,7 @@ export function SurveyFlow() {
                     selected={skill.includes(o.v)} onClick={() => toggleSkill(o.v)} />
                 ))}
               </Section>
-              <Section label={`가장 큰 어려움 (1개 이상 · ${difficulties.length}개)`}>
+              <Section label={`수업 평가 고민 (1개 이상 · ${difficulties.length}개)`}>
                 {DIFF_OPTIONS.map((o) => (
                   <ChoiceCard key={o.v} title={o.label} description={o.desc}
                     selected={difficulties.includes(o.v)} onClick={() => toggleDiff(o.v)} />
