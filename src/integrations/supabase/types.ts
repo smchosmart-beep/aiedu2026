@@ -20,6 +20,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          pin_hash: string
+          pin_salt: string
           survey_code: string
         }
         Insert: {
@@ -27,6 +29,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          pin_hash?: string
+          pin_salt?: string
           survey_code: string
         }
         Update: {
@@ -34,6 +38,8 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          pin_hash?: string
+          pin_salt?: string
           survey_code?: string
         }
         Relationships: [

@@ -1,12 +1,26 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, MessageSquareQuote, Send, User } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Loader2, Pencil, Send, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  createConsultation,
+  updateConsultation,
+  deleteConsultation,
+} from "@/lib/consultations.functions";
 
 type Consultation = {
   id: string;
@@ -14,12 +28,13 @@ type Consultation = {
   consultant_name: string;
   content: string;
   created_at: string;
+  pin_hash: string;
 };
 
 async function fetchConsultations(code: string): Promise<Consultation[]> {
   const { data, error } = await supabase
     .from("consultations")
-    .select("*")
+    .select("id, survey_code, consultant_name, content, created_at, pin_hash")
     .eq("survey_code", code)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
@@ -30,30 +45,89 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
+  const [pin, setPin] = useState("");
+
+  const createFn = useServerFn(createConsultation);
+  const updateFn = useServerFn(updateConsultation);
+  const deleteFn = useServerFn(deleteConsultation);
+
+  const [editTarget, setEditTarget] = useState<Consultation | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editPin, setEditPin] = useState("");
+
+  const [deleteTarget, setDeleteTarget] = useState<Consultation | null>(null);
+  const [deletePin, setDeletePin] = useState("");
 
   const { data: list, isLoading } = useQuery({
     queryKey: ["consultations", surveyCode],
     queryFn: () => fetchConsultations(surveyCode),
   });
 
-  const m = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("consultations").insert({
-        survey_code: surveyCode,
-        consultant_name: name.trim(),
-        content: content.trim(),
-      });
-      if (error) throw new Error(error.message);
-    },
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["consultations", surveyCode] });
+
+  const create = useMutation({
+    mutationFn: () =>
+      createFn({
+        data: {
+          surveyCode,
+          consultantName: name.trim(),
+          content: content.trim(),
+          pin,
+        },
+      }),
     onSuccess: () => {
       setContent("");
-      qc.invalidateQueries({ queryKey: ["consultations", surveyCode] });
+      setPin("");
+      invalidate();
       toast.success("컨설팅 기록이 저장되었습니다");
     },
     onError: (e: Error) => toast.error(e.message || "저장에 실패했습니다"),
   });
 
-  const canSubmit = name.trim().length > 0 && content.trim().length > 0 && !m.isPending;
+  const update = useMutation({
+    mutationFn: () =>
+      updateFn({
+        data: {
+          id: editTarget!.id,
+          pin: editPin,
+          consultantName: editName.trim(),
+          content: editContent.trim(),
+        },
+      }),
+    onSuccess: () => {
+      setEditTarget(null);
+      setEditPin("");
+      invalidate();
+      toast.success("수정되었습니다");
+    },
+    onError: (e: Error) => toast.error(e.message || "수정에 실패했습니다"),
+  });
+
+  const remove = useMutation({
+    mutationFn: () =>
+      deleteFn({ data: { id: deleteTarget!.id, pin: deletePin } }),
+    onSuccess: () => {
+      setDeleteTarget(null);
+      setDeletePin("");
+      invalidate();
+      toast.success("삭제되었습니다");
+    },
+    onError: (e: Error) => toast.error(e.message || "삭제에 실패했습니다"),
+  });
+
+  const canSubmit =
+    name.trim().length > 0 &&
+    content.trim().length > 0 &&
+    /^\d{4}$/.test(pin) &&
+    !create.isPending;
+
+  const openEdit = (c: Consultation) => {
+    setEditTarget(c);
+    setEditName(c.consultant_name);
+    setEditContent(c.content);
+    setEditPin("");
+  };
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border p-5 space-y-5">
@@ -68,7 +142,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
       <p className="text-xs text-muted-foreground -mt-2">
         {readOnly
           ? "이 영역은 공개되어 누구나 열람할 수 있습니다. 작성은 교사지원단 화면에서 가능합니다."
-          : "이 영역은 공개되어 있어 누구나 열람·작성할 수 있습니다. 기록은 수정·삭제되지 않습니다."}
+          : "이 영역은 공개되어 있어 누구나 열람·작성할 수 있습니다. 본인이 설정한 4자리 PIN을 알아야 수정·삭제할 수 있습니다."}
       </p>
 
       {!readOnly && (
@@ -87,9 +161,24 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
             className="min-h-[140px] rounded-xl leading-relaxed"
             maxLength={4000}
           />
+          <div className="space-y-1.5">
+            <Input
+              type="password"
+              inputMode="numeric"
+              pattern="\d{4}"
+              maxLength={4}
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="수정·삭제용 PIN 4자리 숫자"
+              className="h-12 rounded-xl"
+            />
+            <p className="text-[11px] text-muted-foreground px-1">
+              이 PIN을 알고 있는 사람만 본인이 남긴 기록을 수정·삭제할 수 있습니다. 분실 시 복구 불가.
+            </p>
+          </div>
           <div className="flex justify-end">
-            <Button onClick={() => m.mutate()} disabled={!canSubmit} className="rounded-xl">
-              {m.isPending ? (
+            <Button onClick={() => create.mutate()} disabled={!canSubmit} className="rounded-xl">
+              {create.isPending ? (
                 <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
               ) : (
                 <Send className="w-4 h-4 mr-1.5" />
@@ -117,26 +206,136 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
           </div>
         )}
 
-        {list?.map((c) => (
-          <article
-            key={c.id}
-            className="rounded-2xl border-l-4 border-primary bg-primary/5 p-4 space-y-2"
-          >
-            <header className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <User className="w-3.5 h-3.5 text-primary" />
-                {c.consultant_name}
-              </span>
-              <span className="text-xs text-muted-foreground ml-auto">
-                {new Date(c.created_at).toLocaleString("ko-KR")}
-              </span>
-            </header>
-            <p className="text-[15px] leading-7 text-foreground whitespace-pre-wrap">
-              {c.content}
-            </p>
-          </article>
-        ))}
+        {list?.map((c) => {
+          const canModify = !readOnly && c.pin_hash !== "";
+          return (
+            <article
+              key={c.id}
+              className="rounded-2xl border-l-4 border-primary bg-primary/5 p-4 space-y-2"
+            >
+              <header className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                  {c.consultant_name}
+                </span>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  {new Date(c.created_at).toLocaleString("ko-KR")}
+                </span>
+                {canModify && (
+                  <div className="flex gap-1 w-full sm:w-auto sm:ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => openEdit(c)}
+                    >
+                      <Pencil className="w-3 h-3 mr-1" /> 수정
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                      onClick={() => {
+                        setDeleteTarget(c);
+                        setDeletePin("");
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" /> 삭제
+                    </Button>
+                  </div>
+                )}
+              </header>
+              <p className="text-[15px] leading-7 text-foreground whitespace-pre-wrap">
+                {c.content}
+              </p>
+            </article>
+          );
+        })}
       </div>
+
+      {/* 수정 다이얼로그 */}
+      <Dialog open={editTarget !== null} onOpenChange={(o) => !o && setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>컨설팅 기록 수정</DialogTitle>
+            <DialogDescription>
+              작성 시 설정한 4자리 PIN을 입력해야 수정할 수 있습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="작성자"
+              maxLength={60}
+            />
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[140px]"
+              maxLength={4000}
+            />
+            <Input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={editPin}
+              onChange={(e) => setEditPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="PIN 4자리"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditTarget(null)}>
+              취소
+            </Button>
+            <Button
+              onClick={() => update.mutate()}
+              disabled={
+                update.isPending ||
+                !/^\d{4}$/.test(editPin) ||
+                editName.trim().length === 0 ||
+                editContent.trim().length === 0
+              }
+            >
+              {update.isPending && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />}
+              저장
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 삭제 다이얼로그 */}
+      <Dialog open={deleteTarget !== null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>컨설팅 기록 삭제</DialogTitle>
+            <DialogDescription>
+              작성 시 설정한 4자리 PIN을 입력하면 이 기록이 영구 삭제됩니다.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            value={deletePin}
+            onChange={(e) => setDeletePin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            placeholder="PIN 4자리"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => remove.mutate()}
+              disabled={remove.isPending || !/^\d{4}$/.test(deletePin)}
+            >
+              {remove.isPending && <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />}
+              삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
