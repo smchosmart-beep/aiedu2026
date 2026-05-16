@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeEntry } from "@/components/consult/CodeEntry";
 import { BrowseAll } from "@/components/consult/BrowseAll";
+import { KeywordSearch } from "@/components/consult/KeywordSearch";
 
 export const Route = createFileRoute("/view")({
   component: ViewPage,
