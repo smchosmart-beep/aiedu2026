@@ -1,43 +1,25 @@
-# 설문 '어려움' 항목 → '수업 평가 고민'으로 교체
+# 수업 평가 고민에 '기타' 옵션 + 직접 입력 추가
 
 ## 변경 요약
-4단계의 **"가장 큰 어려움"** 객관식(infra/admin/design/account)을 **"수업 평가 고민"** 4가지 신유형으로 교체합니다. 중복 선택 가능, 최소 1개 필수(기존과 동일).
+4단계 '수업 평가 고민' 객관식에 다섯 번째 카드 **"기타"**를 추가하고, 선택 시 자유 입력 칸이 나타나도록 합니다.
 
-## 새 선택지
-| key | 라벨(짧음) | 부제(상세) |
-|---|---|---|
-| `courseware` | AI 코스웨어 매너리즘형 | "AI 문제집만 풀려요" |
-| `burnout` | 에듀테크 번아웃형 | "새로운 도구 배우기 지쳤어요" |
-| `pbl` | PBL 평가 실종형 | "활동은 화려한데 평가는 주관적이에요" |
-| `fragmented` | 데이터 파편화형 | "앱은 10개 쓰는데 남는 데이터가 없어요" |
+## 동작
+- '기타' 카드를 선택하면 아래에 텍스트 입력란(`Input`, h-14 rounded-2xl 스타일)이 펼쳐짐
+- 다음 단계로 가려면 4가지 기본 옵션 중 최소 1개 선택 **또는** 기타 + 입력값(공백 제외)이 있어야 함
+- 기타 카드를 해제하면 입력값도 비워짐
 
-ChoiceCard의 `title`에 라벨, `description`에 큰따옴표 문구를 넣어 기존 카드 톤을 유지합니다.
+## 데이터 모델
+- `Difficulty` 유니온에 `"other"` 추가 → `SurveyResponse.difficulties` 배열에 `"other"` 포함 가능
+- `SurveyResponse`에 신규 옵셔널 필드 `otherDifficulty?: string` 추가 (자유 입력 텍스트 저장)
 
-## 분류 로직(classify.ts) 매핑
-기존 difficulties는 점수 보정에 사용 중:
-- `design` 포함 → +1 (Type C 쪽으로)
-- `infra`/`account`만 → -0.5 (Type A 쪽으로)
+## 표시(Dashboard)
+- `DIFF_LABEL.other = "기타"`
+- 뱃지 렌더링 시 `"other"` 항목은 라벨 대신 `otherDifficulty` 텍스트(있으면)를 표시, 없으면 "기타"
 
-신규 항목은 "평가 고민의 깊이"를 반영해 다음과 같이 매핑합니다:
-- `pbl`, `fragmented` 중 1개 이상 포함 → **+1** (평가 본질 갈증 → C 성향)
-- `burnout`만 단독 선택 → **-0.5** (도구 피로 → A 성향)
-- `courseware`만 단독 선택 → **0** (중립, B 성향 유지)
-- 그 외 혼합 → 보정 없음
+## 분류 로직(classify.ts)
+- `"other"`는 점수 보정 없음(중립). 기존 매핑(pbl/fragmented → +1, burnout 단독 → -0.5)은 그대로 유지하되, "burnout 단독" 판정은 길이 1 그대로 두어 other와 섞이면 보정 안 함.
 
-## 기술 변경 사항
-1. **src/lib/types.ts**
-   - `Difficulty` 유니온 교체: `"courseware" | "burnout" | "pbl" | "fragmented"`
-   - (필드명 `difficulties`는 호환 위해 유지)
-2. **src/components/survey/SurveyFlow.tsx**
-   - `DIFF_OPTIONS` 4개 신규 항목으로 교체
-   - 섹션 라벨: `가장 큰 어려움 (1개 이상 · N개)` → `수업 평가 고민 (1개 이상 · N개)`
-   - 4단계 subtitle "현재 숙련도와 가장 큰 어려움 2가지" → "현재 숙련도와 수업 평가 고민"
-3. **src/lib/classify.ts**
-   - 새 매핑 규칙으로 `adj` 계산식 교체
-4. **Dashboard 표시(있다면)**: 라벨 출력 부분이 있는지 확인 후 매핑 갱신
-
-## 확인 필요
-- 기존에 저장된 응답(localStorage)에 옛 키(`infra` 등)가 남아 있을 수 있습니다. 표시 시 알 수 없는 키는 그대로 키 문자열로 노출됩니다. **기존 응답을 어떻게 처리할지** 알려주세요:
-  - (a) 무시하고 신규 응답부터 적용 (권장, 단순)
-  - (b) 옛 키 → 신규 키 자동 매핑(예: design→pbl, infra/account→burnout)
-  - (c) 옛 응답 일괄 삭제
+## 변경 파일
+1. `src/lib/types.ts` — `Difficulty`에 `"other"` 추가, `SurveyResponse.otherDifficulty?: string`
+2. `src/components/survey/SurveyFlow.tsx` — DIFF_OPTIONS에 기타 추가, 입력 상태(`otherDifficulty`) 및 조건부 Input, `canNext` 갱신, submit에 필드 포함
+3. `src/components/consult/Dashboard.tsx` — `DIFF_LABEL.other` 추가, 뱃지/표시에서 other일 때 자유 입력 텍스트 사용
