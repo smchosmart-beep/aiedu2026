@@ -17,7 +17,7 @@ import { REGIONS } from "@/lib/types";
 import type { SurveyResponse } from "@/lib/types";
 import { Dashboard } from "./Dashboard";
 
-export function CodeEntry() {
+export function CodeEntry({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [region, setRegion] = useState("");
   const [schoolName, setSchoolName] = useState("");
   const [results, setResults] = useState<SurveyResponse[] | null>(null);
