@@ -30,3 +30,18 @@ export const REGIONS = [
   "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
   "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
 ];
+
+export type SchoolLevel = "elementary" | "middle" | "high" | "other";
+export const SCHOOL_LEVEL_LABEL: Record<SchoolLevel, string> = {
+  elementary: "초등학교",
+  middle: "중학교",
+  high: "고등학교",
+  other: "기타",
+};
+export function inferSchoolLevel(name: string): SchoolLevel {
+  if (/초등/.test(name)) return "elementary";
+  if (/중학/.test(name)) return "middle";
+  if (/고등/.test(name)) return "high";
+  return "other";
+}
+
