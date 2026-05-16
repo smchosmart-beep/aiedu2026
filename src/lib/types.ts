@@ -2,7 +2,7 @@ export type DeviceOS = "chromebook" | "whalebook" | "ipad" | "android" | "window
 export type DeviceMode = "1to1" | "cart" | "mobile";
 export type Account = "personal" | "shared" | "none";
 export type Skill = 1 | 2 | 3 | 4;
-export type Difficulty = "courseware" | "burnout" | "pbl" | "fragmented";
+export type Difficulty = "courseware" | "burnout" | "pbl" | "fragmented" | "other";
 export type EvalGoal = "grading" | "feedback" | "inquiry" | "agency";
 
 export type SurveyResponse = {
