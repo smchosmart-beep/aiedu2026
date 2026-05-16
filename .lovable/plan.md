@@ -1,48 +1,51 @@
 ## 변경 사항
 
-### 1. `src/components/consult/ConsultationPanel.tsx`
-- `readOnly?: boolean` prop 추가
-- `readOnly === true`일 때:
-  - 작성자 Input, 내용 Textarea, "기록 남기기" Button (form 블록 전체) 숨김
-  - Badge 텍스트 "공개" → "열람 전용"
-  - 상단 안내 문구: "이 영역은 공개되어 누구나 열람할 수 있습니다. 작성은 교사지원단 화면에서 가능합니다."
+전제: **학교급은 학교명에서 자동 추정**(A안). DB 변경 없음.
 
-### 2. `src/components/consult/Dashboard.tsx`
-- `readOnly?: boolean` prop 추가, `<ConsultationPanel readOnly={readOnly} ... />`로 전달
-- 헤더 제목 라벨도 readOnly일 때 "컨설팅 결과 열람"으로 변경
+### 1. `src/lib/types.ts`
+- 추가:
+  ```ts
+  export type SchoolLevel = "elementary" | "middle" | "high" | "other";
+  export const SCHOOL_LEVEL_LABEL: Record<SchoolLevel, string> = {
+    elementary: "초등학교", middle: "중학교", high: "고등학교", other: "기타",
+  };
+  export function inferSchoolLevel(name: string): SchoolLevel {
+    if (/초등/.test(name)) return "elementary";
+    if (/중학/.test(name)) return "middle";
+    if (/고등/.test(name)) return "high";
+    return "other";
+  }
+  ```
 
-### 3. `src/components/consult/CodeEntry.tsx`
-- `readOnly?: boolean` prop 추가
-- 헤더 라벨/안내문/제출 버튼 라벨을 readOnly에 따라 분기
-  - readOnly: 헤더 "컨설팅 결과 열람", H1 "학교 결과 찾기", 안내 "지역과 학교명을 입력해 컨설팅 결과를 열람하세요"
-  - 기본(write): 기존 그대로
-- Dashboard 렌더 시 `readOnly` 전달
+### 2. `src/lib/storage.ts`
+- 새 함수:
+  ```ts
+  export async function listAllResponses(): Promise<SurveyResponse[]>
+  ```
+  - `surveys` 전체 select, `created_at desc`, `rowToResponse` 매핑
 
-### 4. 새 라우트 `src/routes/view.tsx`
-```tsx
-export const Route = createFileRoute("/view")({
-  component: ViewPage,
-  head: () => ({ meta: [
-    { title: "컨설팅 결과 열람 · 컨설팅 사전 진단" },
-    { name: "description", content: "지역과 학교명으로 컨설팅 결과를 누구나 열람할 수 있습니다." },
-  ]}),
-});
-function ViewPage() { return <CodeEntry readOnly />; }
-```
-- `SupportGate` 없음 → 인증 없이 누구나 접근 가능
+### 3. `src/components/consult/BrowseAll.tsx` (신규)
+- 헤더(뒤로 가기 + "전체 결과 둘러보기")
+- 필터 영역:
+  - **학교급** Select: 전체 / 초 / 중 / 고 / 기타
+  - **과목** Select: 전체 + DB 결과에서 추출한 unique `targetSubject` (빈 값 제외, 정렬)
+- 필터된 결과 카드 리스트 (학교명 · 지역 배지 · 학교급 배지 · 과목 · 제출 일시)
+- 카드 클릭 → `setSelected(r)` → `<Dashboard data={r} readOnly onBack={...} />`
+- 로딩/빈 상태 처리
 
-### 5. `src/components/Landing.tsx`
-- 세 번째 `Card` 추가:
-  - `to="/view"`
-  - tag: "공개 · 누구나"
-  - title: "컨설팅 결과 열람"
-  - desc: "지역과 학교명으로 우리 학교의 컨설팅 결과를 확인하세요"
-  - icon: `Eye` (lucide-react) — A/B 모드와 다른 아이콘
-  - `primary` 없음
+### 4. `src/routes/view.tsx`
+- 상단에 Tabs 두 개:
+  - **"학교명으로 찾기"** → 기존 `<CodeEntry readOnly />`
+  - **"전체 둘러보기"** → 신규 `<BrowseAll />`
+- 기본 탭은 "학교명으로 찾기" (기존 동작 유지)
+
+### 5. Landing 카드 설명 미세 수정 (선택)
+- "지역·학교명 또는 과목·학교급으로 컨설팅 결과를 확인하세요"로 갱신
 
 ### 미변경
-- DB·RLS (SELECT는 이미 public)
-- 작성 RLS는 그대로 (SupportGate가 UI 차원 보호) — 별도 요청 없으므로 정책 유지
+- DB 스키마, RLS, A/B 모드, 작성 권한
+- Dashboard / ConsultationPanel (readOnly 그대로 사용)
 
 ### 참고
-- `/view`와 `/consult` 모두 동일한 `CodeEntry` UI를 사용하지만, `readOnly` 분기로 작성 폼만 차이
+- 과목 옵션은 클라이언트에서 fetch한 전체 결과로부터 추출(데이터량이 크지 않음).
+- 추후 데이터가 많아지면 server-side filtering으로 전환 가능.
