@@ -118,7 +118,7 @@ export function SurveyFlow() {
       case 0: return !!region && schoolName.trim().length > 0;
       case 1: return deviceOS.length > 0 && !!deviceMode;
       case 2: return !!account;
-      case 3: return difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0);
+      case 3: return difficulties.length >= 1 && (!difficulties.includes("other") || otherDifficulty.trim().length > 0) && difficultyDetail.trim().length > 0;
       case 4: return preferredTools.length > 0 && targetSubject.trim().length > 0;
       default: return false;
     }
@@ -227,7 +227,7 @@ export function SurveyFlow() {
                 )}
                 <div className="pt-2">
                   <label className="text-sm font-medium text-muted-foreground">
-                    고민 세부 내용 (선택 사항 · 직접 서술)
+                    고민 세부 내용 (직접 서술)
                   </label>
                   <Textarea
                     value={difficultyDetail}
