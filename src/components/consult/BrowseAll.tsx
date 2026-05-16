@@ -100,7 +100,11 @@ export function BrowseAll() {
       </div>
 
       <div className="mt-6">
-        {isLoading ? (
+        {level === "all" && subject === "all" ? (
+          <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+            학교급 또는 과목을 선택하세요
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center gap-2 text-muted-foreground text-sm py-8 justify-center">
             <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중…
           </div>
