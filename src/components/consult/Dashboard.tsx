@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check } from "lucide-react";
+import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check, Users, Quote, Compass } from "lucide-react";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import type { SurveyResponse } from "@/lib/types";
@@ -140,6 +140,67 @@ const TYPE_META: Record<TypeKey, TypeContent> = {
       "학교/지역 단위 사례 공유와 동료 교사 코칭으로 확장하세요. 컨설턴트 후보입니다.",
     script:
       "기술을 의심하게 만드십시오. AI 알고리즘의 오류를 수학적 원리로 반박하게 가르치는 것이 진짜 혁신입니다. 7의 배수 판별처럼, 학생이 'AI보다 내가 더 정확하게 안다'를 한 번이라도 경험하면 평생 갑니다.",
+  },
+};
+
+type TypeGuide = {
+  accentText: string;
+  accentBg: string;
+  accentBorder: string;
+  quoteBorder: string;
+  headline: string;
+  target: string;
+  philosophyTitle: string;
+  philosophyQuote: string;
+  direction: string;
+  keywords: string[];
+};
+
+const TYPE_GUIDE: Record<TypeKey, TypeGuide> = {
+  A: {
+    accentText: "text-sky-700 dark:text-sky-400",
+    accentBg: "bg-sky-50 dark:bg-sky-950/30",
+    accentBorder: "border-sky-500",
+    quoteBorder: "border-sky-300 dark:border-sky-700",
+    headline: "AI는 '편리한 자동화 도구'다.",
+    target:
+      "에듀테크 진입 장벽(계정, 인프라)과 행정 피로도가 높아 새로운 시도를 꺼리는 학교.",
+    philosophyTitle: "효율성과 하이터치",
+    philosophyQuote:
+      "기계가 할 일은 기계에게 맡기고, 교사는 인간만이 할 수 있는 일에 집중한다.",
+    direction:
+      "AI 코스웨어(접속 코드 방식 등)를 활용해 채점과 기초 학력 진단을 자동화합니다. 교사는 AI가 분석한 데이터 대시보드를 바탕으로 개별 학생에게 다가가 정서적 지지와 맞춤형 피드백(High-Touch)을 제공합니다.",
+    keywords: ["업무경감", "데이터진단", "채점자동화", "피드백집중"],
+  },
+  B: {
+    accentText: "text-amber-700 dark:text-amber-400",
+    accentBg: "bg-amber-50 dark:bg-amber-950/30",
+    accentBorder: "border-amber-500",
+    quoteBorder: "border-amber-300 dark:border-amber-700",
+    headline: "AI는 '의심스러운 파트너'다.",
+    target:
+      "띵커벨, 패들렛 등 상호작용 도구 사용에는 능숙하나, 생성형 AI를 단순 흥미 위주로만 소비하는 학교.",
+    philosophyTitle: "비판적 수용",
+    philosophyQuote:
+      "AI의 대답은 정답이 아니라 훌륭한 초안(Draft)일 뿐이며, 완성은 인간의 몫이다.",
+    direction:
+      "내장형 AI 챗봇이나 글쓰기 도우미가 생성한 결과물에서 논리적 오류, 할루시네이션(환각), 편향성을 찾아내게 합니다. 학생이 AI와 논쟁하고 팩트체크하며 자신만의 논리로 재구성(Refining)하는 '과정 자체'를 평가합니다.",
+    keywords: ["비판적사고", "팩트체크", "초안수정", "인간의결정권"],
+  },
+  C: {
+    accentText: "text-violet-700 dark:text-violet-400",
+    accentBg: "bg-violet-50 dark:bg-violet-950/30",
+    accentBorder: "border-violet-500",
+    quoteBorder: "border-violet-300 dark:border-violet-700",
+    headline: "AI는 '해체와 검증의 대상'이다.",
+    target:
+      "1인 1기기 인프라가 완비되어 있고 교사들의 에듀테크 숙련도가 높으나, 툴 활용을 넘어선 '수업의 본질적 깊이'에 갈증을 느끼는 학교.",
+    philosophyTitle: "알고리즘 주체성",
+    philosophyQuote:
+      "AI가 왜 틀리는지, 어떻게 작동하는지를 교과 지식을 무기로 증명해 낸다.",
+    direction:
+      "학생이 직접 데이터를 입력해 머신러닝을 학습시키거나, AI가 실패하는 극단적 사례(반례)를 의도적으로 설계합니다. '7의 배수 판별법' 사례처럼 AI의 기술적 한계를 초등 수학, 사회, 과학 등의 교과 원리로 반박하고 개선하는 최고 수준의 메타인지 능력을 평가합니다.",
+    keywords: ["메타인지", "알고리즘검증", "교과지식융합", "기술주체성"],
   },
 };
 
@@ -357,6 +418,8 @@ export function Dashboard({ data, onBack }: Props) {
             </span>
           </div>
           <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
+
+          <TypeGuideCard guide={TYPE_GUIDE[type]} />
         </Widget>
 
         <Widget icon="⚠️" title="현재 겪고 있는 어려움 (확인용)" delay={0.15}>
@@ -526,6 +589,82 @@ function ScriptCard({ script }: { script: string }) {
           </p>
         ))}
       </div>
+    </div>
+  );
+}
+
+function TypeGuideCard({ guide }: { guide: TypeGuide }) {
+  return (
+    <div
+      className={`mt-5 rounded-2xl border-l-4 ${guide.accentBorder} ${guide.accentBg} p-5 space-y-5`}
+    >
+      <h4 className="text-lg font-bold text-foreground leading-snug">
+        “{guide.headline}”
+      </h4>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Users className="w-3.5 h-3.5" />}
+        label="대상 학교"
+      >
+        <p className="text-[14px] leading-relaxed text-foreground/85">{guide.target}</p>
+      </GuideRow>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Quote className="w-3.5 h-3.5" />}
+        label={`수업 철학 — ${guide.philosophyTitle}`}
+      >
+        <blockquote
+          className={`border-l-2 ${guide.quoteBorder} pl-3 italic text-[15px] leading-relaxed text-foreground/90`}
+        >
+          “{guide.philosophyQuote}”
+        </blockquote>
+      </GuideRow>
+
+      <GuideRow
+        accentText={guide.accentText}
+        icon={<Compass className="w-3.5 h-3.5" />}
+        label="평가 혁신 방향"
+      >
+        <p className="text-[14px] leading-relaxed text-foreground/85">{guide.direction}</p>
+      </GuideRow>
+
+      <div className="flex flex-wrap gap-1.5 pt-1">
+        {guide.keywords.map((kw) => (
+          <Badge
+            key={kw}
+            variant="secondary"
+            className="rounded-full text-[12px] font-medium px-2.5 py-0.5"
+          >
+            #{kw}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GuideRow({
+  accentText,
+  icon,
+  label,
+  children,
+}: {
+  accentText: string;
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div
+        className={`flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase ${accentText}`}
+      >
+        {icon}
+        <span>{label}</span>
+      </div>
+      {children}
     </div>
   );
 }

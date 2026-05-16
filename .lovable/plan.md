@@ -1,50 +1,78 @@
-# 컨설팅 처방전 대시보드 UI 개선 계획
+# [기본 진단 결과] 가이드 카드 추가 계획
 
-## 1. 기본 모델 처방 영역 축소 (`Dashboard.tsx` 398~477줄)
+## 변경 범위
 
-- 기존 `"핵심 수업·평가 모델 처방 (기준 모델)"` Widget을 **`"기본 진단 결과"`** 로 타이틀 변경 (아이콘은 🎯 유지).
-- 내부에서 **삭제**할 것:
-  - 모델 정의 / 1차시 운영 흐름 / 평가 포인트 / 흔한 함정 / 다음 단계 5개 Section 전부 (436~476줄)
-  - STAGES 진행 막대 (409~431줄)
-  - `typeMeta.stage` 텍스트 (433줄)
-- **남길 것**:
-  - `Type 뱃지`: `<Badge>` 안에 `Target` 아이콘 + `typeMeta.label`(예: "Type C · 전문가형") 크게 표시
-  - 점수 표기 (`점수 X.X / 5`)
-  - `typeMeta.oneLiner` 1~2줄 요약만 표시
-- 결과: 약 80줄짜리 위젯이 ~15줄짜리 컴팩트 카드 1개로 축소.
-- 참고: `TYPE_META` 상수 자체는 `oneLiner`/`label`/`script`가 아직 일부 사용되므로 **삭제하지 않음**. 단 더 이상 참조되지 않는 `STAGES` 상수와 `Target`을 제외한 미사용 import는 정리.
+**수정 파일**: `src/components/consult/Dashboard.tsx` 단일 파일 (프론트엔드 전용, 백엔드 변경 없음)
 
-## 2. AI 맞춤 처방전: Accordion 도입 (`Dashboard.tsx` 295~395줄)
+## 1. 타입별 가이드 데이터 상수 신설
 
-- shadcn `Accordion` (`@/components/ui/accordion`)을 새로 import.
-- 다음 3개 Section을 `<Accordion type="multiple">` 안의 `AccordionItem`으로 변환 (기본 닫힘 상태):
-  - `수업 흐름` (flow)
-  - `평가 포인트` (evaluationPoints)
-  - `흔한 함정` (commonTraps)
-- 각 `AccordionTrigger`에는 기존 `Section`이 보여주던 **아이콘 + 제목 + summary 한 줄**을 좌측 정렬로 노출하여 닫힌 상태에서도 핵심을 파악 가능하게 함.
-- `AccordionContent`에 기존 ol/ul 리스트 본문을 그대로 렌더링.
-- 상단 영역(타이틀 / 한 줄 요약 / 모델 정의)은 **항상 노출** 유지 — 모델 정의는 짧고 핵심이므로 아코디언 밖에 둠.
+`Dashboard.tsx` 상단(`TYPE_META` 옆)에 신규 상수 `TYPE_GUIDE` 추가:
 
-## 3. 현장 스크립트 카드 + 복사 기능
+```ts
+type TypeGuide = {
+  accent: string;        // tailwind 컬러 토큰 (sky / amber / violet 계열)
+  bgClass: string;       // 카드 배경 (옅은 톤)
+  borderClass: string;   // 좌측 보더
+  headline: string;      // "AI는 '편리한 자동화 도구'다."
+  target: string;        // 대상 학교 설명
+  philosophyTitle: string; // "효율성과 하이터치"
+  philosophyQuote: string; // "기계가 할 일은…"
+  direction: string;       // 평가 혁신 방향
+  keywords: string[];      // ["업무경감", "데이터진단", ...]
+};
 
-- AI 처방전 위젯 내부에서 `consultingScript` 카드(370~386줄)를 **아코디언 위쪽으로 이동**하여 "한 줄 요약" 바로 다음, 모델 정의보다 먼저 노출 → 컨설턴트가 가장 먼저 보게 함.
-- 카드 디자인 강화:
-  - 배경: `bg-blue-50 dark:bg-blue-950/30` 톤(옅은 파란색), 좌측 두꺼운 보더(`border-l-[6px] border-primary`) 유지
-  - 좌상단 `MessageSquareQuote` + "현장 스크립트" 라벨 뱃지
-  - 큰 따옴표(`”`) 장식 유지
-- **복사 버튼** (lucide `Copy` 아이콘):
-  - 위치: 카드 우상단 (`absolute top-3 right-3`)
-  - `Button variant="ghost" size="icon"`
-  - 클릭 시 `navigator.clipboard.writeText(consultingScript)` 후 `toast.success("현장 스크립트가 복사되었습니다!")` 호출
-  - `toast`는 `sonner` 에서 import (프로젝트에 이미 `<Toaster />` 마운트되어 있다고 가정; 없으면 `__root.tsx` 확인 후 추가)
-- 복사 성공 시 1.5초간 아이콘을 `Check`로 잠시 바꿔 시각적 피드백 추가.
+const TYPE_GUIDE: Record<TypeKey, TypeGuide> = { A: {…}, B: {…}, C: {…} };
+```
 
-## 기술 메모
+내용은 사용자가 제시한 텍스트를 그대로 반영. 컬러는:
+- A → sky(파랑) — 안정/도구
+- B → amber(주황) — 의심/긴장
+- C → violet(보라) — 깊이/전문성
 
-- 수정 파일: **`src/components/consult/Dashboard.tsx` 단일 파일**.
-- 신규 import: `Accordion, AccordionItem, AccordionTrigger, AccordionContent`, `Copy`, `Check`, `toast` (from `sonner`), `useState`.
-- 삭제할 import: `ArrowRight` (다음 단계 박스 제거), `STAGES` 상수.
-- 백엔드(서버 함수, 프롬프트, 스키마)는 **변경 없음** — 순수 프론트엔드 작업.
-- `<Toaster />` 마운트 여부를 `src/routes/__root.tsx`에서 1회 확인하고, 없으면 추가하는 것까지 작업 범위에 포함.
+## 2. [기본 진단 결과] 위젯 구조 개편
 
-작업 후 미리보기에서 모바일 폭(390px 가정)으로 스크롤 길이가 줄었는지, 아코디언이 부드럽게 열리는지, 복사 토스트가 정상 동작하는지 확인.
+현재 위젯(약 15줄, Type 뱃지 + 점수 + oneLiner)을 다음 구조로 확장:
+
+```
+┌─ Widget "기본 진단 결과" ─────────────────────────┐
+│  [Type B · 도약형]  점수 X.X / 5                  │
+│  oneLiner (한 줄 요약, 기존 유지)                  │
+│                                                   │
+│  ┌─ 타입별 핵심 정의 카드 (TypeGuideCard) ──────┐ │
+│  │  ※ 옅은 accent 배경 + 좌측 4px accent border │ │
+│  │                                              │ │
+│  │  [헤드라인 - 큰 폰트, bold]                  │ │
+│  │  "AI는 '의심스러운 파트너'다."                │ │
+│  │                                              │ │
+│  │  ◆ 대상 학교 (작은 라벨)                     │ │
+│  │  본문 (sm, muted)                            │ │
+│  │                                              │ │
+│  │  ◆ 수업 철학 — 비판적 수용                   │ │
+│  │  "AI의 대답은 정답이 아니라…" (인용 스타일)    │ │
+│  │                                              │ │
+│  │  ◆ 평가 혁신 방향                            │ │
+│  │  본문 (sm)                                   │ │
+│  │                                              │ │
+│  │  [#비판적사고] [#팩트체크] [#초안수정] …      │ │
+│  └──────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────┘
+```
+
+## 3. 신규 헬퍼 컴포넌트 `TypeGuideCard`
+
+파일 하단에 추가. 구조:
+- 컨테이너: `rounded-2xl border-l-4 {accent border} {bg accent/5} p-5 space-y-4`
+- 헤드라인: `text-lg font-bold text-foreground`
+- 섹션 라벨(`대상 학교`, `수업 철학`, `평가 혁신 방향`): `text-[11px] font-semibold tracking-widest uppercase text-{accent}` + lucide 아이콘 (예: `Users`, `Quote`, `Sparkles`)
+- 본문: `text-[14px] leading-relaxed text-foreground/85`
+- 철학 인용문: 별도 `<blockquote>` 스타일 — `italic`, 좌측 얇은 보더, 약간 더 큰 폰트
+- 키워드 영역: `flex flex-wrap gap-1.5`, 각 키워드는 shadcn `<Badge variant="secondary">` 에 `#` prefix + `rounded-full text-[12px]`
+
+## 4. 디자인 토큰 사용 원칙
+
+- 가능한 한 `bg-primary/5`, `border-primary/20`처럼 디자인 토큰 기반으로 표현.
+- 타입별 accent는 tailwind 기본 팔레트(`sky-500`, `amber-500`, `violet-500`) 직접 사용 — 3개 타입 시각적 구분을 위한 한정 사용이며, 기존 `AlertTriangle`/`emerald-500` 등도 같은 방식으로 이미 사용 중이라 정합성 유지.
+
+## 결과
+
+`[기본 진단 결과]` 위젯이 단순 Type 뱃지에서 → 타입별 "철학·대상·방향·키워드"를 한 카드에서 한눈에 파악할 수 있는 가이드 카드로 확장됩니다. 컨설턴트가 현장에서 "왜 이 학교가 B인지, 어떤 관점으로 접근해야 하는지"를 즉시 설명할 수 있습니다.
