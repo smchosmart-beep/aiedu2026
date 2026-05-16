@@ -229,7 +229,7 @@ export function Dashboard({ data, onBack }: Props) {
           typeLabel: typeMeta.label,
           subject: data.targetSubject ?? "",
           tools: data.preferredTools ?? [],
-          difficulties: (data.difficulties ?? []).map((d) => DIFF_LABEL[d] ?? d),
+          difficulties: (data.difficulties ?? []).map(diffLabel),
           evalGoal: EVAL_LABEL[data.evalGoal] ?? data.evalGoal,
           schoolName: data.schoolName,
           region: data.region,
