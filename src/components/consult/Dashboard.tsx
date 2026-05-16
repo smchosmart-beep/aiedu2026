@@ -36,7 +36,7 @@ const EVAL_LABEL: Record<string, string> = {
   inquiry: "비판적 탐구", agency: "학생 주체성 평가",
 };
 
-type TypeKey = "A" | "A-B" | "B" | "B-C" | "C";
+type TypeKey = "A" | "B" | "C";
 
 type TypeContent = {
   label: string;
