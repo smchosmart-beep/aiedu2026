@@ -1,0 +1,1 @@
+ALTER TABLE public.consultations ADD COLUMN link_url TEXT NULL;

@@ -5,6 +5,17 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const pinSchema = z.string().regex(/^\d{4}$/, "PIN은 숫자 4자리여야 합니다");
 const nameSchema = z.string().trim().min(1).max(60);
 const contentSchema = z.string().trim().min(1).max(4000);
+const linkSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .nullable()
+  .transform((v) => (v && v.length > 0 ? v : null))
+  .refine(
+    (v) => v === null || /^https?:\/\/[^\s]+$/i.test(v),
+    "링크는 http(s):// 로 시작해야 합니다",
+  );
 
 async function sha256Hex(input: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
@@ -52,6 +63,7 @@ export const createConsultation = createServerFn({ method: "POST" })
         surveyCode: z.string().trim().min(1).max(20),
         consultantName: nameSchema,
         content: contentSchema,
+        linkUrl: linkSchema,
         pin: pinSchema,
       })
       .parse(input),
@@ -63,6 +75,7 @@ export const createConsultation = createServerFn({ method: "POST" })
       survey_code: data.surveyCode,
       consultant_name: data.consultantName,
       content: data.content,
+      link_url: data.linkUrl,
       pin_hash: hash,
       pin_salt: salt,
     });
@@ -78,6 +91,7 @@ export const updateConsultation = createServerFn({ method: "POST" })
         pin: pinSchema,
         consultantName: nameSchema,
         content: contentSchema,
+        linkUrl: linkSchema,
       })
       .parse(input),
   )
@@ -88,6 +102,7 @@ export const updateConsultation = createServerFn({ method: "POST" })
       .update({
         consultant_name: data.consultantName,
         content: data.content,
+        link_url: data.linkUrl,
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
