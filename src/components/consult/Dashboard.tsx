@@ -427,16 +427,6 @@ export function Dashboard({ data, onBack }: Props) {
           <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
         </Widget>
 
-        {/* 기존 정적 현장 스크립트 위젯은 AI 처방전 내부로 통합되어 제거됨 */}
-        <Widget icon="📝" title="연구자 메모 (기준 화법)" delay={0.1}>
-          <div className="rounded-2xl bg-muted/40 border-l-4 border-muted-foreground/30 p-4">
-            <MessageSquareQuote className="w-6 h-6 text-primary mb-2" />
-            <p className="text-foreground text-base leading-relaxed font-medium">
-              "{typeMeta.script}"
-            </p>
-          </div>
-        </Widget>
-
         <Widget icon="⚠️" title="현재 겪고 있는 어려움 (확인용)" delay={0.15}>
           <p className="text-xs text-muted-foreground mb-3">
             처방이 아니라, 선생님이 체크하신 항목을 다시 확인하는 영역입니다.
