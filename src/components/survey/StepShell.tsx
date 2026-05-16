@@ -70,8 +70,6 @@ export function StepShell({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-        </div>
-      </div>
 
       <div className="flex-1 max-w-xl w-full mx-auto px-5 pt-8 pb-32">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
