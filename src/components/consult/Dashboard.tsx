@@ -241,6 +241,37 @@ export function Dashboard({ data, onBack }: Props) {
           <p className="text-muted-foreground mt-1">컨설팅 사전 진단 결과</p>
         </motion.div>
 
+        <Widget icon="🎯" title="기본 진단 결과" delay={0.05}>
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <Badge className="rounded-full bg-primary text-primary-foreground text-sm px-3 py-1">
+              <Target className="w-3.5 h-3.5 mr-1" />
+              {typeMeta.label}
+            </Badge>
+            <span className="text-xs text-muted-foreground font-mono ml-auto">
+              점수 {score.toFixed(1)} / 5
+            </span>
+          </div>
+          <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
+          <TypeGuideCard guide={TYPE_GUIDE[type]} />
+        </Widget>
+
+        <Widget icon="⚠️" title="학교가 체크한 고민" delay={0.1}>
+          {difficultyBadges.length === 0 ? (
+            <p className="text-sm text-muted-foreground">특이 사항 없음</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {difficultyBadges.map((b, i) => (
+                <Badge key={i} variant="outline" className="rounded-full">{b}</Badge>
+              ))}
+            </div>
+          )}
+          {data.difficultyDetail && (
+            <blockquote className="mt-4 rounded-2xl border-l-4 border-primary bg-primary/5 px-4 py-3 text-[15px] leading-7 text-foreground whitespace-pre-wrap">
+              {data.difficultyDetail}
+            </blockquote>
+          )}
+        </Widget>
+
         <ConsultationPanel surveyCode={data.code} />
 
         <details className="rounded-2xl bg-card border p-5 text-sm">
