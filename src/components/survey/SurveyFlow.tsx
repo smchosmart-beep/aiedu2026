@@ -111,7 +111,7 @@ export function SurveyFlow() {
     }
   };
 
-  if (done) return <CompleteCard code={done} schoolName={schoolName} />;
+  if (done) return <CompleteCard />;
 
   const canNext = (() => {
     switch (step) {
