@@ -20,6 +20,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          link_url: string | null
           pin_hash: string
           pin_salt: string
           survey_code: string
@@ -29,6 +30,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          link_url?: string | null
           pin_hash?: string
           pin_salt?: string
           survey_code: string
@@ -38,6 +40,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          link_url?: string | null
           pin_hash?: string
           pin_salt?: string
           survey_code?: string
