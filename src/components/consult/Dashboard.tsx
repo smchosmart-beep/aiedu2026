@@ -590,5 +590,3 @@ function ScriptCard({ script }: { script: string }) {
     </div>
   );
 }
-
-type Props = { data: SurveyResponse; onBack: () => void };
