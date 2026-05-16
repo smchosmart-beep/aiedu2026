@@ -301,10 +301,19 @@ export function Dashboard({ data, onBack }: Props) {
                 </p>
               </div>
 
-              <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의">
+              {aiQuery.data.summary && (
+                <div className="rounded-2xl bg-primary/10 border border-primary/20 px-4 py-3 text-center">
+                  <div className="text-[11px] font-semibold text-primary tracking-widest mb-1">한 줄 요약</div>
+                  <p className="text-[16px] font-semibold text-foreground leading-snug">
+                    {aiQuery.data.summary}
+                  </p>
+                </div>
+              )}
+
+              <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의" summary={aiQuery.data.modelSummary}>
                 <div className="rounded-2xl bg-muted/40 px-4 py-3.5">
                   <p className="text-[15px] leading-7 text-foreground">
-                    {aiQuery.data.modelDefinition}
+                    {renderBold(aiQuery.data.modelDefinition)}
                   </p>
                 </div>
               </Section>
@@ -325,7 +334,7 @@ export function Dashboard({ data, onBack }: Props) {
                             {label}
                           </div>
                           <p className="mt-0.5 text-[15px] leading-7 text-foreground">
-                            {body}
+                            {renderBold(body)}
                           </p>
                         </div>
                       </li>
@@ -334,25 +343,25 @@ export function Dashboard({ data, onBack }: Props) {
                 </ol>
               </Section>
 
-              <Section icon={<CheckCircle2 className="w-4 h-4" />} title="평가 포인트">
+              <Section icon={<CheckCircle2 className="w-4 h-4" />} title="평가 포인트" summary={aiQuery.data.evaluationSummary}>
                 <ul className="rounded-2xl border-l-4 border-emerald-500 bg-emerald-500/5 px-4 py-3 divide-y divide-dashed divide-emerald-500/20">
                   {aiQuery.data.evaluationPoints.map((s, i) => (
                     <li key={i} className="flex gap-2.5 py-2.5 first:pt-1 last:pb-1 text-[15px] leading-7 text-foreground">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1.5 shrink-0" />
-                      <span>{s}</span>
+                      <span>{renderBold(s)}</span>
                     </li>
                   ))}
                 </ul>
               </Section>
 
-              <Section icon={<AlertTriangle className="w-4 h-4" />} title="흔한 함정">
+              <Section icon={<AlertTriangle className="w-4 h-4" />} title="흔한 함정" summary={aiQuery.data.trapsSummary}>
                 <ul className="space-y-2.5 rounded-2xl border-l-4 border-amber-500 bg-amber-500/5 p-4">
                   {aiQuery.data.commonTraps.map((s, i) => (
                     <li key={i} className="flex gap-3 items-start text-[15px] leading-7 text-foreground">
                       <span className="shrink-0 w-6 h-6 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold flex items-center justify-center mt-0.5">
                         {i + 1}
                       </span>
-                      <span>{s}</span>
+                      <span>{renderBold(s)}</span>
                     </li>
                   ))}
                 </ul>
@@ -370,7 +379,7 @@ export function Dashboard({ data, onBack }: Props) {
                     .filter(Boolean)
                     .map((sentence, i) => (
                       <p key={i} className="text-foreground text-[15px] leading-7 font-medium">
-                        {sentence}
+                        {renderBold(sentence)}
                       </p>
                     ))}
                 </div>
@@ -549,13 +558,19 @@ function Widget({
   );
 }
 
-function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Section({ icon, title, summary, children }: { icon: React.ReactNode; title: string; summary?: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2 text-primary">
         {icon}
         <h4 className="text-sm font-bold">{title}</h4>
       </div>
+      {summary && (
+        <div className="mb-2 rounded-lg bg-primary/5 px-3 py-1.5 text-[13px] text-foreground/80 leading-snug">
+          <span className="font-semibold text-primary mr-1.5">요약</span>
+          {summary}
+        </div>
+      )}
       {children}
     </div>
   );
@@ -569,3 +584,14 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// Render **bold** markdown safely without dangerouslySetInnerHTML
+function renderBold(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    const m = p.match(/^\*\*([^*]+)\*\*$/);
+    if (m) return <strong key={i} className="font-bold text-foreground">{m[1]}</strong>;
+    return <span key={i}>{p}</span>;
+  });
+}
+

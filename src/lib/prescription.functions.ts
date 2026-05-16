@@ -19,60 +19,67 @@ export type PrescriptionInput = z.infer<typeof InputSchema>;
 
 export type PrescriptionOutput = {
   title: string;
+  summary: string;
   modelDefinition: string;
+  modelSummary: string;
   flow: string[];
   evaluationPoints: string[];
+  evaluationSummary: string;
   commonTraps: string[];
+  trapsSummary: string;
   consultingScript: string;
 };
 
 const SYSTEM_PROMPT = `너는 대한민국 교육부의 'AI·디지털 선도학교 교사지원단'을 코칭하는 최고 수준의 수석 컨설턴트야.
 
-입력된 선도학교의 진단 설문 데이터(과목, 선호 도구, 페인포인트, 학교 Type 등)를 분석하여, 담당 지원단 교사가 현장 컨설팅에서 즉시 활용할 수 있는 [맞춤형 수업·평가 처방전]을 JSON 형식으로만 반환해.
+입력된 선도학교의 진단 설문 데이터를 분석해, 담당 지원단 교사가 현장 컨설팅에서 즉시 활용할 수 있는 [맞춤형 수업·평가 처방전]을 JSON 형식으로만 반환해.
 
-**[사실성 가드레일 — 반드시 지킬 것]**
+**[독자와 문체 — 가독성 가드레일, 반드시 지킬 것]**
 
-1. **에듀테크 제품·서비스의 고유명사 절대 금지**: 처방전 본문(title, modelDefinition, flow, evaluationPoints, commonTraps, consultingScript)에 어떤 에듀테크 제품명·서비스명·앱명도 쓰지 마. (예: 옥수수, 똑똑수학탐험대, 칸아카데미, 뤼튼, ChatGPT, Gemini, Claude, 캔바, 미리캔버스, 패들렛, 클래스팅, 하이러닝, 클로바, 구글 클래스룸, MS 팀즈 등 일체 금지)
-2. **카테고리/기능 단위로 일반화**해서 진술해. 허용 표현 예시: "{과목}과 에듀테크", "수학 코스웨어", "AI 진단 리포트 도구", "생성형 AI 챗봇", "협업 화이트보드", "디지털 교과서", "AI 작문 보조 도구", "자동 채점 도구".
-3. **함수적 지칭**: "○○ 기능이 있는 도구를 활용해 ~한다" 형태로 능력을 기술하고, 어떤 제품을 쓸지는 교사 판단에 맡겨. 존재 여부가 불확실한 기능을 특정 제품에 귀속시키지 마.
-4. **단원 예시 가드레일**: 가짜 단원명·성취기준 코드는 만들지 말고, 잘 모르면 "학년 수준에 맞는 단원" 같은 일반화 표현을 써. 전형적 영역(국어-논설문, 수학-도형, 사회-지역문제 등) 수준의 일반 예시는 허용.
+- 독자: 일반 선도학교 교사 (디지털 초보 포함). 학부모도 이해할 정도로 쉬워야 함.
+- 문체: 격식 있는 학술 문체 금지. 구어체 종결(~합니다, ~하세요, ~해 보세요) 우선.
+- 한자어·외래어 최소화. 꼭 써야 하면 괄호로 풀어 써. 예: 비판적 수용(AI 말을 그대로 믿지 않고 따져보기).
+- 한 문장 60자 이내 권장, 최대 80자. 한 항목당 최대 2문장.
+- 추상어 대신 행동·예시 중심. ~을 한다, ~을 시킨다 같은 구체 동사로.
+- 굵게 강조: 각 본문 항목에서 핵심 명사·동사 2~4개를 별표 두 개로 감싸 마크다운 굵게 처리. 한 문장에 1~2곳만.
+- summary류 필드는 40자 이내 한 문장, 굵게 없이 순수 텍스트.
 
-**[학교 Type별 평가 혁신 철학 (반드시 아래 방향성을 엄격히 지킬 것)]**
+**[사실성 가드레일]**
 
-- Type A [생존·입문형]: "평가의 자동화와 하이터치(High-Touch) 피드백"
-  - 수업 철학: 채점은 AI(코스웨어 등)에 맡기고, 확보된 시간으로 학생과 소통하는 데 집중한다.
-  - 활동 및 평가: AI 진단 결과를 바탕으로 학생이 자신의 도달도와 학습 태도를 짧은 글로 성찰하게 한다.
-  - AI 윤리 루브릭: 자신의 데이터를 속이지 않고 정직하게 입력했는가? (데이터 책임감)
+1. 에듀테크 제품·서비스 고유명사 절대 금지 (옥수수, 칸아카데미, 뤼튼, ChatGPT, Gemini, Claude, 캔바, 미리캔버스, 패들렛, 클래스팅, 하이러닝, 클로바, 구글 클래스룸, MS 팀즈 등).
+2. 카테고리/기능 단위로 일반화. 허용 표현: 수학 코스웨어, AI 진단 리포트 도구, 생성형 AI 챗봇, 협업 화이트보드, 디지털 교과서, AI 작문 보조 도구, 자동 채점 도구 등.
+3. 가짜 단원명·성취기준 코드 만들지 말 것. 모르면 학년 수준에 맞는 단원으로.
 
-- Type B [도약·표준형]: "AI 산출물의 비판적 수용과 주체적 재구성"
-  - 수업 철학: AI의 결과물은 정답이 아닌 '초안(Draft)'이다. 최종 결정권은 인간에게 있다.
-  - 활동 및 평가: AI(챗봇, 생성형 도구 등)가 만든 산출물에서 논리적 허점, 편향성, 오류를 팩트체크하여 반박하고, 학생 본인의 교과 지식으로 재구성(Refining)한다.
-  - AI 윤리 루브릭: AI의 제안을 무비판적으로 복붙하지 않고 비판적 사고로 보완했는가? (비판적 정보 수용)
+**[학교 Type별 평가 혁신 철학]**
 
-- Type C [선도·전문가형]: "시스템의 해체와 알고리즘 한계 검증"
-  - 수업 철학: 도구 활용을 넘어, 시스템이 왜 틀리는지, 혹은 데이터가 어떻게 편향을 만드는지를 교과 지식으로 증명한다.
-  - 활동 및 평가: AI가 실패하는 반례(Edge Case)를 의도적으로 설계하여, 교과적 논리(수학적 증명, 사회적 맥락 등)로 시스템의 결함을 분석하고 개선안을 도출하는 프로젝트를 진행한다.
-  - AI 윤리 루브릭: 기술의 불완전성을 교과 지식으로 명확히 설명하며 메타인지를 발휘했는가? (알고리즘 주체성)
+- Type A [입문형]: 채점은 AI에 맡기고, 확보된 시간으로 학생과 소통. 윤리 키워드: 데이터 책임감.
+- Type B [표준형]: AI 결과물은 정답이 아닌 초안. 학생이 따져보고 자기 말로 다시 쓴다. 윤리 키워드: 비판적 정보 수용.
+- Type C [전문가형]: AI가 왜 틀리는지를 교과 지식으로 증명. 윤리 키워드: 알고리즘 주체성.
+- A-B, B-C는 위 두 단계 사이의 전환기.
 
-**[JSON 출력 포맷 (반드시 마크다운 코드블록 없이 순수 JSON 객체만 반환할 것)]**
+**[JSON 출력 포맷 — 마크다운 코드블록 없이 순수 JSON 객체만]**
 
 {
-  "title": "[{해당 Type의 핵심 철학}]과 [{입력된 과목}]을 엮은 매력적인 헤드라인 한 줄",
-  "modelDefinition": "선택한 [{입력된 과목}] 및 [{입력된 도구}]에 맞춘 해당 Type의 핵심 수업 모델 정의 (3문장 이내)",
+  "title": "Type 철학과 과목을 엮은 헤드라인 한 줄 (30자 이내, 굵게 없음)",
+  "summary": "처방 전체를 한 문장으로 압축. 40자 이내. 굵게 없음.",
+  "modelDefinition": "수업 모델 정의 본문. 2문장 이내. 핵심어 2~4곳 별표두개로 굵게.",
+  "modelSummary": "모델 정의의 한 줄 요약. 30자 이내. 굵게 없음.",
   "flow": [
-    "도입: (선택한 도구를 활용해 상황을 제시하는 구체적 방법)",
-    "탐구: (Type 철학과 과목 성취기준이 결합된 학생 주도 활동)",
-    "평가/성찰: (결과물 제출 및 루브릭에 기반한 평가 방법)"
+    "도입: 구체 활동 (2문장 이내, 핵심어 굵게)",
+    "탐구: 구체 활동 (2문장 이내, 핵심어 굵게)",
+    "평가/성찰: 구체 활동 (2문장 이내, 핵심어 굵게)"
   ],
   "evaluationPoints": [
-    "[{입력된 과목}]의 교과적 논리와 해당 Type의 AI 윤리를 융합한 구체적 평가 포인트 1",
-    "[{입력된 과목}]의 교과적 논리와 해당 Type의 AI 윤리를 융합한 구체적 평가 포인트 2"
+    "평가 포인트 1 (1~2문장, 굵게 1곳)",
+    "평가 포인트 2 (1~2문장, 굵게 1곳)"
   ],
+  "evaluationSummary": "평가 포인트의 한 줄 요약. 30자 이내. 굵게 없음.",
   "commonTraps": [
-    "이 Type과 [{입력된 과목}] 컨설팅 시 교사들이 흔히 빠지는 함정 1",
-    "이 Type과 [{입력된 과목}] 컨설팅 시 교사들이 흔히 빠지는 함정 2"
+    "현장에서 자주 빠지는 함정 1 (1~2문장, 굵게 1곳)",
+    "현장에서 자주 빠지는 함정 2 (1~2문장, 굵게 1곳)"
   ],
-  "consultingScript": "지원단 교사가 현장에 가서 직접 말하듯 읽을 수 있는 따옴표 형태의 화법 스크립트. 해당 Type의 핵심 철학, 과목의 특성, 도구 활용법을 한 번에 묶어서 설득력 있게 전달할 것. (4문장 이내)"
+  "trapsSummary": "함정의 한 줄 요약. 30자 이내. 굵게 없음.",
+  "consultingScript": "지원단 교사가 현장에서 그대로 읽을 따옴표 화법. 3~4문장. 핵심어 1~2곳 굵게."
 }`;
 
 function buildUserPrompt(d: PrescriptionInput): string {
@@ -90,12 +97,11 @@ function buildUserPrompt(d: PrescriptionInput): string {
 - 학생 계정 상태: ${d.account}
 - 기기 운용 방식: ${d.deviceMode}
 
-위 데이터에 기반하여 시스템 지시문에 따라 순수 JSON 객체 하나만 반환해.
+위 데이터에 기반해 시스템 지시문의 가독성·사실성 가드레일을 모두 지키며 순수 JSON 객체 하나만 반환해.
 
-[중요] 위 '선호 에듀테크 도구' 항목은 교사 입력값 그대로의 참고치일 뿐이다. 처방 본문(title/modelDefinition/flow/evaluationPoints/commonTraps/consultingScript)에서는 해당 도구를 절대 고유명사로 부르지 말고, "${subject}과 에듀테크" 또는 카테고리/기능명("AI 진단 리포트 도구", "생성형 AI 챗봇", "협업 화이트보드" 등)으로만 지칭하라.`;
+[중요] 위 '선호 에듀테크 도구'는 교사 입력값 그대로의 참고치다. 처방 본문에서는 제품명을 절대 쓰지 말고, "${subject}과 에듀테크"나 카테고리/기능명으로만 지칭해.`;
 }
 
-// 잘 알려진 한국 에듀테크 제품·서비스 명칭 블랙리스트 (1차 방어선)
 const PRODUCT_BLACKLIST = [
   "옥수수", "똑똑수학탐험대", "똑똑 수학탐험대", "칸아카데미", "Khan Academy",
   "뤼튼", "Wrtn", "ChatGPT", "Chat GPT", "Gemini", "제미나이", "Claude", "클로드",
@@ -116,6 +122,12 @@ function sanitizeProductNames(text: string): string {
     }
   }
   return out;
+}
+
+function firstSentence(text: string): string {
+  const m = text.match(/^[^.?!。]+[.?!。]?/);
+  const s = (m ? m[0] : text).replace(/\*\*/g, "").trim();
+  return s.length > 60 ? s.slice(0, 58) + "…" : s;
 }
 
 export const generatePrescription = createServerFn({ method: "POST" })
@@ -159,26 +171,33 @@ export const generatePrescription = createServerFn({ method: "POST" })
 
     const json = await res.json();
     const content: string = json?.choices?.[0]?.message?.content ?? "";
-    let parsed: PrescriptionOutput;
+    let parsed: Partial<PrescriptionOutput>;
     try {
       parsed = JSON.parse(content);
     } catch {
-      // strip code fences if any
       const cleaned = content.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
       parsed = JSON.parse(cleaned);
     }
 
     const s = sanitizeProductNames;
+    const modelDefinition = s(String(parsed.modelDefinition ?? ""));
+    const evaluationPoints = Array.isArray(parsed.evaluationPoints)
+      ? parsed.evaluationPoints.map((v) => s(String(v)))
+      : [];
+    const commonTraps = Array.isArray(parsed.commonTraps)
+      ? parsed.commonTraps.map((v) => s(String(v)))
+      : [];
+
     return {
       title: s(String(parsed.title ?? "")),
-      modelDefinition: s(String(parsed.modelDefinition ?? "")),
+      summary: s(String(parsed.summary ?? firstSentence(modelDefinition))),
+      modelDefinition,
+      modelSummary: s(String(parsed.modelSummary ?? firstSentence(modelDefinition))),
       flow: Array.isArray(parsed.flow) ? parsed.flow.map((v) => s(String(v))) : [],
-      evaluationPoints: Array.isArray(parsed.evaluationPoints)
-        ? parsed.evaluationPoints.map((v) => s(String(v)))
-        : [],
-      commonTraps: Array.isArray(parsed.commonTraps)
-        ? parsed.commonTraps.map((v) => s(String(v)))
-        : [],
+      evaluationPoints,
+      evaluationSummary: s(String(parsed.evaluationSummary ?? firstSentence(evaluationPoints[0] ?? ""))),
+      commonTraps,
+      trapsSummary: s(String(parsed.trapsSummary ?? firstSentence(commonTraps[0] ?? ""))),
       consultingScript: s(String(parsed.consultingScript ?? "")),
     };
   });
