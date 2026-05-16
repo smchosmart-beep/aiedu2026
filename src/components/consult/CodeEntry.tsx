@@ -69,10 +69,10 @@ export function CodeEntry() {
             <Button
               type="submit"
               size="lg"
-              disabled={code.length < 4}
+              disabled={code.length < 4 || loading}
               className="w-full h-14 rounded-2xl text-base"
             >
-              처방전 보기
+              {loading ? "조회 중…" : "컨설팅 기록 보기"}
             </Button>
           </form>
         </motion.div>
