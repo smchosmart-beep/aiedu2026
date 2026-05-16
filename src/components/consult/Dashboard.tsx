@@ -213,7 +213,9 @@ export function Dashboard({ data, onBack }: Props) {
   const { type, score } = classify(data);
   const typeMeta = TYPE_META[type];
 
-  const difficultyBadges = data.difficulties.map((d) => DIFF_LABEL[d]);
+  const diffLabel = (d: string) =>
+    d === "other" ? (data.otherDifficulty?.trim() || "기타") : (DIFF_LABEL[d] ?? d);
+  const difficultyBadges = data.difficulties.map(diffLabel);
   if (data.account === "none") difficultyBadges.push("계정 발급 불가");
   else if (data.account === "shared") difficultyBadges.push("교사 공용 계정");
 
