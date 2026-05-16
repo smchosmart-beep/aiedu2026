@@ -36,7 +36,7 @@ export function Landing() {
             to="/consult"
             tag="교사지원단"
             title="컨설팅 기록하기"
-            desc="6자리 코드로 학교를 찾아 컨설팅 내용을 기록하세요"
+            desc="교사지원단 이시라면 컨설팅 내용을 기록해주세요."
             icon={<PencilLine className="w-7 h-7" />}
             delay={0.2}
           />
