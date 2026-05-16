@@ -12,15 +12,23 @@ import { Dashboard } from "./Dashboard";
 export function CodeEntry() {
   const [code, setCode] = useState("");
   const [data, setData] = useState<SurveyResponse | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e?: React.FormEvent) => {
+  const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    const r = getResponse(code);
-    if (!r) {
-      toast.error("유효하지 않은 코드입니다");
-      return;
+    setLoading(true);
+    try {
+      const r = await getResponse(code);
+      if (!r) {
+        toast.error("유효하지 않은 코드입니다");
+        return;
+      }
+      setData(r);
+    } catch (err) {
+      toast.error((err as Error).message || "조회에 실패했습니다");
+    } finally {
+      setLoading(false);
     }
-    setData(r);
   };
 
   if (data) return <Dashboard data={data} onBack={() => setData(null)} />;
