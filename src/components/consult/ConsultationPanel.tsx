@@ -26,7 +26,7 @@ async function fetchConsultations(code: string): Promise<Consultation[]> {
   return (data ?? []) as Consultation[];
 }
 
-export function ConsultationPanel({ surveyCode }: { surveyCode: string }) {
+export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode: string; readOnly?: boolean }) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
@@ -60,39 +60,45 @@ export function ConsultationPanel({ surveyCode }: { surveyCode: string }) {
       <div className="flex items-center gap-2">
         <span className="text-xl">📝</span>
         <h3 className="font-bold">교사지원단 컨설팅 기록</h3>
-        <Badge variant="secondary" className="ml-auto rounded-full text-[11px]">공개</Badge>
+        <Badge variant="secondary" className="ml-auto rounded-full text-[11px]">
+          {readOnly ? "열람 전용" : "공개"}
+        </Badge>
       </div>
 
       <p className="text-xs text-muted-foreground -mt-2">
-        이 영역은 공개되어 있어 누구나 열람·작성할 수 있습니다. 기록은 수정·삭제되지 않습니다.
+        {readOnly
+          ? "이 영역은 공개되어 누구나 열람할 수 있습니다. 작성은 교사지원단 화면에서 가능합니다."
+          : "이 영역은 공개되어 있어 누구나 열람·작성할 수 있습니다. 기록은 수정·삭제되지 않습니다."}
       </p>
 
-      <div className="space-y-3 rounded-2xl border bg-muted/30 p-4">
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="작성자 (예: 홍길동 · 00교육청 지원단)"
-          className="h-12 rounded-xl"
-          maxLength={60}
-        />
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="진단 결과와 학교 상황을 바탕으로 컨설팅 의견을 작성해 주세요."
-          className="min-h-[140px] rounded-xl leading-relaxed"
-          maxLength={4000}
-        />
-        <div className="flex justify-end">
-          <Button onClick={() => m.mutate()} disabled={!canSubmit} className="rounded-xl">
-            {m.isPending ? (
-              <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4 mr-1.5" />
-            )}
-            기록 남기기
-          </Button>
+      {!readOnly && (
+        <div className="space-y-3 rounded-2xl border bg-muted/30 p-4">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="작성자 (예: 홍길동 · 00교육청 지원단)"
+            className="h-12 rounded-xl"
+            maxLength={60}
+          />
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="진단 결과와 학교 상황을 바탕으로 컨설팅 의견을 작성해 주세요."
+            className="min-h-[140px] rounded-xl leading-relaxed"
+            maxLength={4000}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => m.mutate()} disabled={!canSubmit} className="rounded-xl">
+              {m.isPending ? (
+                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 mr-1.5" />
+              )}
+              기록 남기기
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-3">
         <div className="text-sm font-semibold text-muted-foreground">
