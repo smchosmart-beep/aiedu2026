@@ -204,6 +204,8 @@ const TYPE_GUIDE: Record<TypeKey, TypeGuide> = {
   },
 };
 
+type Props = { data: SurveyResponse; onBack: () => void };
+
 export function Dashboard({ data, onBack }: Props) {
   const { type, score } = classify(data);
   const typeMeta = TYPE_META[type];
