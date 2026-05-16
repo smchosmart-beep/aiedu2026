@@ -139,8 +139,8 @@ export function SurveyFlow() {
         "처방의 기준이 되는 기본 정보예요",
         "사용 중인 OS와 운용 방식을 모두 골라주세요",
         "학생 계정 발급 상태를 골라주세요",
-        "현재 숙련도와 수업 평가 고민",
-        "주로 쓰는 도구와 평가 혁신 방향",
+        "수업 평가 고민",
+        "주로 쓰는 도구와 평가 혁신 과목",
       ][step]}
       onBack={step > 0 ? back : undefined}
       onNext={step === TOTAL - 1 ? submit : next}
