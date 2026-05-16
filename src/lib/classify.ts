@@ -13,15 +13,13 @@ export function classify(r: SurveyResponse): ClassifyResult {
     : 1;
   const skillScore = Math.max(0, Math.min(3, avgSkill - 1));
 
-  // 신호 3: 어려움 보정
+  // 신호 3: 수업 평가 고민 보정
   let adj = 0;
-  const hasDesign = r.difficulties.includes("design");
-  const onlyInfraOrAccount =
-    !hasDesign &&
-    r.difficulties.length > 0 &&
-    r.difficulties.every((d) => d === "infra" || d === "account");
-  if (hasDesign) adj += 1;
-  if (onlyInfraOrAccount) adj -= 0.5;
+  const diffs = r.difficulties;
+  const hasDeep = diffs.includes("pbl") || diffs.includes("fragmented");
+  const onlyBurnout = diffs.length === 1 && diffs[0] === "burnout";
+  if (hasDeep) adj += 1;
+  else if (onlyBurnout) adj -= 0.5;
 
   const score = accountScore + skillScore + adj;
 
