@@ -39,7 +39,7 @@ function ViewPage() {
             <TabsTrigger value="browse" className="rounded-xl">전체 둘러보기</TabsTrigger>
           </TabsList>
           <TabsContent value="search" className="mt-0">
-            <CodeEntryEmbedded />
+            <CodeEntry readOnly embedded />
           </TabsContent>
           <TabsContent value="browse" className="mt-0">
             <BrowseAll />
@@ -48,8 +48,4 @@ function ViewPage() {
       </div>
     </div>
   );
-}
-
-function CodeEntryEmbedded() {
-  return <CodeEntry readOnly />;
 }
