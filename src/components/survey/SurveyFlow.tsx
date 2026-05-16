@@ -91,7 +91,13 @@ export function SurveyFlow() {
   const toggleOS = (v: DeviceOS) =>
     setDeviceOS((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
   const toggleDiff = (v: Difficulty) =>
-    setDifficulties((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
+    setDifficulties((p) => {
+      if (p.includes(v)) {
+        if (v === "other") setOtherDifficulty("");
+        return p.filter((x) => x !== v);
+      }
+      return [...p, v];
+    });
 
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => Math.max(0, s - 1));
