@@ -23,9 +23,9 @@ const DIFF_LABEL: Record<string, string> = {
   other: "기타",
 };
 
-type Props = { data: SurveyResponse; onBack: () => void };
+type Props = { data: SurveyResponse; onBack: () => void; readOnly?: boolean };
 
-export function Dashboard({ data, onBack }: Props) {
+export function Dashboard({ data, onBack, readOnly = false }: Props) {
   const diffLabel = (d: string) =>
     d === "other" ? (data.otherDifficulty?.trim() || "기타") : (DIFF_LABEL[d] ?? d);
   const difficultyBadges = data.difficulties.map(diffLabel);
@@ -39,7 +39,7 @@ export function Dashboard({ data, onBack }: Props) {
           <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-muted">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <div className="font-semibold">컨설팅 기록</div>
+          <div className="font-semibold">{readOnly ? "컨설팅 결과 열람" : "컨설팅 기록"}</div>
           <div className="ml-auto text-xs text-muted-foreground font-mono">
             {data.code}
           </div>
