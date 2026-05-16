@@ -90,6 +90,22 @@ export async function getResponse(code: string): Promise<SurveyResponse | null> 
   return data ? rowToResponse(data as Row) : null;
 }
 
+export async function findResponsesBySchool(
+  region: string,
+  schoolName: string
+): Promise<SurveyResponse[]> {
+  const name = schoolName.trim();
+  if (!region || !name) return [];
+  const { data, error } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("region", region)
+    .ilike("school_name", `%${name}%`)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => rowToResponse(r as Row));
+}
+
 export function seedIfNeeded() {
   // no-op
 }
