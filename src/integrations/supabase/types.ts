@@ -14,7 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      consultations: {
+        Row: {
+          consultant_name: string
+          content: string
+          created_at: string
+          id: string
+          survey_code: string
+        }
+        Insert: {
+          consultant_name: string
+          content: string
+          created_at?: string
+          id?: string
+          survey_code: string
+        }
+        Update: {
+          consultant_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          survey_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_survey_code_fkey"
+            columns: ["survey_code"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          account: string
+          code: string
+          created_at: string
+          device_mode: string
+          device_os: string[]
+          difficulties: string[]
+          difficulty_detail: string | null
+          eval_goal: string
+          other_difficulty: string | null
+          preferred_tools: string[]
+          region: string
+          school_name: string
+          skill: number[]
+          target_subject: string
+        }
+        Insert: {
+          account: string
+          code: string
+          created_at?: string
+          device_mode: string
+          device_os?: string[]
+          difficulties?: string[]
+          difficulty_detail?: string | null
+          eval_goal: string
+          other_difficulty?: string | null
+          preferred_tools?: string[]
+          region: string
+          school_name: string
+          skill?: number[]
+          target_subject?: string
+        }
+        Update: {
+          account?: string
+          code?: string
+          created_at?: string
+          device_mode?: string
+          device_os?: string[]
+          difficulties?: string[]
+          difficulty_detail?: string | null
+          eval_goal?: string
+          other_difficulty?: string | null
+          preferred_tools?: string[]
+          region?: string
+          school_name?: string
+          skill?: number[]
+          target_subject?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

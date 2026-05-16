@@ -15,6 +15,7 @@ export type SurveyResponse = {
   skill: Skill[];
   difficulties: Difficulty[];
   otherDifficulty?: string;
+  difficultyDetail?: string;
   preferredTools: string[];
   targetSubject: string;
   evalGoal: EvalGoal;

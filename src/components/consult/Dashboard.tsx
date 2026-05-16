@@ -1,15 +1,10 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Target, MessageSquareQuote, CheckCircle2, AlertTriangle, BookOpen, ListOrdered, Sparkles, Loader2, RefreshCw, Copy, Check, Users, Quote, Compass } from "lucide-react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { toast } from "sonner";
+import { ChevronLeft, Target, Users, Quote, Compass } from "lucide-react";
 import type { SurveyResponse } from "@/lib/types";
 import { classify } from "@/lib/classify";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { generatePrescription } from "@/lib/prescription.functions";
+import { ConsultationPanel } from "./ConsultationPanel";
 
 const OS_LABEL: Record<string, string> = {
   chromebook: "크롬북", whalebook: "웨일북", ipad: "아이패드",
@@ -219,28 +214,6 @@ export function Dashboard({ data, onBack }: Props) {
   if (data.account === "none") difficultyBadges.push("계정 발급 불가");
   else if (data.account === "shared") difficultyBadges.push("교사 공용 계정");
 
-  const generate = useServerFn(generatePrescription);
-  const aiQuery = useQuery({
-    queryKey: ["prescription", data.code],
-    queryFn: () =>
-      generate({
-        data: {
-          type,
-          typeLabel: typeMeta.label,
-          subject: data.targetSubject ?? "",
-          tools: data.preferredTools ?? [],
-          difficulties: (data.difficulties ?? []).map(diffLabel),
-          evalGoal: EVAL_LABEL[data.evalGoal] ?? data.evalGoal,
-          schoolName: data.schoolName,
-          region: data.region,
-          skill: data.skill ?? [],
-          account: ACCOUNT_LABEL[data.account] ?? data.account,
-          deviceMode: MODE_LABEL[data.deviceMode] ?? data.deviceMode,
-        },
-      }),
-    staleTime: Infinity,
-    retry: false,
-  });
 
   return (
     <div className="min-h-screen pb-16">
@@ -249,7 +222,7 @@ export function Dashboard({ data, onBack }: Props) {
           <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-muted">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <div className="font-semibold">컨설팅 처방전</div>
+          <div className="font-semibold">컨설팅 기록</div>
           <div className="ml-auto text-xs text-muted-foreground font-mono">
             {data.code}
           </div>
@@ -265,152 +238,8 @@ export function Dashboard({ data, onBack }: Props) {
             <Badge variant="secondary" className="rounded-full">{data.region}</Badge>
             <span className="text-2xl font-bold">{data.schoolName}</span>
           </div>
-          <p className="text-muted-foreground mt-1">컨설팅 처방전</p>
+          <p className="text-muted-foreground mt-1">컨설팅 사전 진단 결과</p>
         </motion.div>
-
-        <Widget icon="🤖" title="AI 맞춤 처방전" delay={0.02}>
-          {aiQuery.isFetching && (
-            <div className="flex items-center gap-2 text-muted-foreground py-6">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">
-                {data.targetSubject || "선택한 과목"} · {(data.preferredTools ?? []).join(", ") || "선호 도구"} 기반 맞춤 처방전을 작성 중입니다…
-              </span>
-            </div>
-          )}
-
-          {aiQuery.isError && (
-            <div className="space-y-3">
-              <div className="flex items-start gap-2 text-amber-700 text-sm">
-                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                <span>
-                  {(aiQuery.error as Error)?.message ?? "처방전 생성에 실패했습니다."}
-                </span>
-              </div>
-              <Button size="sm" variant="outline" onClick={() => aiQuery.refetch()}>
-                <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                다시 생성
-              </Button>
-            </div>
-          )}
-
-          {aiQuery.data && !aiQuery.isFetching && (
-            <div className="space-y-5">
-              <div className="flex items-start gap-2">
-                <Sparkles className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                <p className="text-lg font-bold text-foreground leading-snug">
-                  {aiQuery.data.title}
-                </p>
-              </div>
-
-              {aiQuery.data.summary && (
-                <div className="rounded-2xl bg-primary/10 border border-primary/20 px-4 py-3 text-center">
-                  <div className="text-[11px] font-semibold text-primary tracking-widest mb-1">한 줄 요약</div>
-                  <p className="text-[16px] font-semibold text-foreground leading-snug">
-                    {aiQuery.data.summary}
-                  </p>
-                </div>
-              )}
-
-              {/* 현장 스크립트 - 가장 돋보이는 카드, 최우선 노출 */}
-              <ScriptCard script={aiQuery.data.consultingScript} />
-
-              {/* 모델 정의 - 짧고 핵심이라 항상 노출 */}
-              <Section icon={<BookOpen className="w-4 h-4" />} title="모델 정의" summary={aiQuery.data.modelSummary}>
-                <div className="rounded-2xl bg-muted/40 px-4 py-3.5">
-                  <p className="text-[15px] leading-7 text-foreground">
-                    {renderBold(aiQuery.data.modelDefinition)}
-                  </p>
-                </div>
-              </Section>
-
-              {/* 긴 본문 3종 - 아코디언으로 접어둠 */}
-              <Accordion type="multiple" className="space-y-2">
-                <AccordionItem value="flow" className="border rounded-2xl px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-3">
-                    <AccordionHead
-                      icon={<ListOrdered className="w-4 h-4" />}
-                      title="수업 흐름"
-                      summary={`${aiQuery.data.flow.length}단계로 구성된 1차시 흐름을 펼쳐 보세요`}
-                    />
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ol className="relative space-y-3 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-px before:bg-border pt-2">
-                      {aiQuery.data.flow.map((s, i) => {
-                        const m = s.match(/^\s*([^:：]{1,20})[:：]\s*(.+)$/s);
-                        const label = m ? m[1].trim() : `${i + 1}단계`;
-                        const body = m ? m[2].trim() : s;
-                        return (
-                          <li key={i} className="relative flex gap-3 items-start">
-                            <span className="z-10 shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center shadow-sm">
-                              {i + 1}
-                            </span>
-                            <div className="flex-1 pt-0.5">
-                              <div className="text-[13px] font-semibold text-primary uppercase tracking-wide">
-                                {label}
-                              </div>
-                              <p className="mt-0.5 text-[15px] leading-7 text-foreground">
-                                {renderBold(body)}
-                              </p>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="eval" className="border rounded-2xl px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-3">
-                    <AccordionHead
-                      icon={<CheckCircle2 className="w-4 h-4" />}
-                      title="평가 포인트"
-                      summary={aiQuery.data.evaluationSummary ?? `${aiQuery.data.evaluationPoints.length}가지 평가 관점`}
-                    />
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="rounded-2xl border-l-4 border-emerald-500 bg-emerald-500/5 px-4 py-3 divide-y divide-dashed divide-emerald-500/20">
-                      {aiQuery.data.evaluationPoints.map((s, i) => (
-                        <li key={i} className="flex gap-2.5 py-2.5 first:pt-1 last:pb-1 text-[15px] leading-7 text-foreground">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1.5 shrink-0" />
-                          <span>{renderBold(s)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="traps" className="border rounded-2xl px-4 bg-card">
-                  <AccordionTrigger className="hover:no-underline py-3">
-                    <AccordionHead
-                      icon={<AlertTriangle className="w-4 h-4" />}
-                      title="흔한 함정"
-                      summary={aiQuery.data.trapsSummary ?? `${aiQuery.data.commonTraps.length}가지 주의사항`}
-                    />
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2.5 rounded-2xl border-l-4 border-amber-500 bg-amber-500/5 p-4">
-                      {aiQuery.data.commonTraps.map((s, i) => (
-                        <li key={i} className="flex gap-3 items-start text-[15px] leading-7 text-foreground">
-                          <span className="shrink-0 w-6 h-6 rounded-full bg-amber-500/15 text-amber-700 text-[11px] font-bold flex items-center justify-center mt-0.5">
-                            {i + 1}
-                          </span>
-                          <span>{renderBold(s)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <div className="flex justify-end">
-                <Button size="sm" variant="ghost" onClick={() => aiQuery.refetch()}>
-                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                  다시 생성
-                </Button>
-              </div>
-            </div>
-          )}
-        </Widget>
 
         <Widget icon="🎯" title="기본 진단 결과" delay={0.05}>
           <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -423,14 +252,10 @@ export function Dashboard({ data, onBack }: Props) {
             </span>
           </div>
           <p className="text-[15px] leading-relaxed text-foreground">{typeMeta.oneLiner}</p>
-
           <TypeGuideCard guide={TYPE_GUIDE[type]} />
         </Widget>
 
-        <Widget icon="⚠️" title="현재 겪고 있는 어려움 (확인용)" delay={0.15}>
-          <p className="text-xs text-muted-foreground mb-3">
-            처방이 아니라, 선생님이 체크하신 항목을 다시 확인하는 영역입니다.
-          </p>
+        <Widget icon="⚠️" title="학교가 체크한 고민" delay={0.1}>
           {difficultyBadges.length === 0 ? (
             <p className="text-sm text-muted-foreground">특이 사항 없음</p>
           ) : (
@@ -440,7 +265,14 @@ export function Dashboard({ data, onBack }: Props) {
               ))}
             </div>
           )}
+          {data.difficultyDetail && (
+            <blockquote className="mt-4 rounded-2xl border-l-4 border-primary bg-primary/5 px-4 py-3 text-[15px] leading-7 text-foreground whitespace-pre-wrap">
+              {data.difficultyDetail}
+            </blockquote>
+          )}
         </Widget>
+
+        <ConsultationPanel surveyCode={data.code} />
 
         <details className="rounded-2xl bg-card border p-5 text-sm">
           <summary className="cursor-pointer font-semibold text-muted-foreground">
@@ -500,23 +332,6 @@ function Widget({
   );
 }
 
-function Section({ icon, title, summary, children }: { icon: React.ReactNode; title: string; summary?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-2 text-primary">
-        {icon}
-        <h4 className="text-sm font-bold">{title}</h4>
-      </div>
-      {summary && (
-        <div className="mb-2 rounded-lg bg-primary/5 px-3 py-1.5 text-[13px] text-foreground/80 leading-snug">
-          <span className="font-semibold text-primary mr-1.5">요약</span>
-          {summary}
-        </div>
-      )}
-      {children}
-    </div>
-  );
-}
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
@@ -527,76 +342,6 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-// Render **bold** markdown safely without dangerouslySetInnerHTML
-function renderBold(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((p, i) => {
-    const m = p.match(/^\*\*([^*]+)\*\*$/);
-    if (m) return <strong key={i} className="font-bold text-foreground">{m[1]}</strong>;
-    return <span key={i}>{p}</span>;
-  });
-}
-
-function AccordionHead({ icon, title, summary }: { icon: React.ReactNode; title: string; summary?: string }) {
-  return (
-    <div className="flex items-center gap-3 text-left flex-1 min-w-0">
-      <span className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-        {icon}
-      </span>
-      <div className="flex-1 min-w-0">
-        <div className="text-[14px] font-bold text-foreground">{title}</div>
-        {summary && (
-          <div className="text-[12px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
-            {summary}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ScriptCard({ script }: { script: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const onCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(script);
-      setCopied(true);
-      toast.success("현장 스크립트가 복사되었습니다!");
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error("복사에 실패했습니다. 다시 시도해 주세요.");
-    }
-  };
-
-  const sentences = script.split(/(?<=[.?!。])\s+/).filter(Boolean);
-
-  return (
-    <div className="relative rounded-2xl border-l-[6px] border-primary bg-blue-50 dark:bg-blue-950/30 p-5 pt-7 shadow-sm">
-      <span className="absolute -top-3 left-4 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold px-2.5 py-1 shadow-sm">
-        <MessageSquareQuote className="w-3 h-3" />
-        현장 스크립트
-      </span>
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={onCopy}
-        aria-label="현장 스크립트 복사"
-        className="absolute top-2 right-2 h-8 w-8 text-primary hover:bg-primary/10"
-      >
-        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-      </Button>
-      <span className="absolute top-1 right-12 text-5xl leading-none text-primary/20 font-serif select-none">”</span>
-      <div className="space-y-2.5 pr-8">
-        {sentences.map((s, i) => (
-          <p key={i} className="text-foreground text-[15px] leading-7 font-medium">
-            {renderBold(s)}
-          </p>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function TypeGuideCard({ guide }: { guide: TypeGuide }) {
   return (
