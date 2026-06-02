@@ -1,62 +1,71 @@
-# 보안 수정 계획
+# 컨설팅 기록 수에 따라 카드 색상 구분
 
 ## 목표
-- `pin_hash`/`pin_salt`가 클라이언트로 절대 노출되지 않도록 차단
-- `consultations`·`surveys` 테이블의 익명 SELECT/INSERT 정책 제거
-- 기존 사용자 흐름(설문 작성·열람, 컨설팅 작성·수정·삭제, 키워드/학교급 검색)은 그대로 유지
+`/view` → "학교급·과목으로 찾기"(BrowseAll) / "키워드로 검색"(KeywordSearch) 결과 카드에서, 각 설문(survey_code)에 달린 **컨설팅 기록 개수**에 따라
+- 개수를 배지로 표시 ("컨설팅 기록 (N)")
+- 카드 배경을 네이비 농도로 구분 (0개 → 기본, 많을수록 진해짐)
 
-## 적용 순서 (안전한 단계별)
+## 변경 사항
 
-### 1단계 — 서버 함수 추가 (DB 정책은 아직 그대로)
+### 1. 서버 함수 추가 — `src/lib/consultations.functions.ts`
+```ts
+export const countConsultationsByCodes = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ codes: z.array(z.string().min(1).max(20)).max(1000) }).parse)
+  .handler(async ({ data }): Promise<Record<string, number>> => {
+    if (data.codes.length === 0) return {};
+    const { data: rows, error } = await supabaseAdmin
+      .from("consultations")
+      .select("survey_code")
+      .in("survey_code", data.codes);
+    if (error) throw new Error(error.message);
+    const map: Record<string, number> = {};
+    for (const r of rows ?? []) {
+      const k = r.survey_code as string;
+      map[k] = (map[k] ?? 0) + 1;
+    }
+    return map;
+  });
+```
 
-**`src/lib/consultations.functions.ts`** (기존 파일에 추가)
-- `listConsultations({ surveyCode })`: `supabaseAdmin`으로 조회, **`pin_hash`/`pin_salt` 제외**한 컬럼만 select. 각 항목에 `canModify: boolean` 플래그 동봉.
-- `createConsultation`: 기존 그대로 유지 + survey_code 존재 검증 한 줄 추가.
+### 2. 디자인 토큰 — `src/styles.css`
+컨설팅 강도용 네이비 스케일을 시멘틱 토큰으로 등록 (직접 색 사용 금지 원칙 준수).
+```css
+--consult-navy-0: var(--card);                         /* 0건 — 기본 */
+--consult-navy-1: oklch(0.94 0.03 250);                /* 1건 */
+--consult-navy-2: oklch(0.86 0.06 250);                /* 2건 */
+--consult-navy-3: oklch(0.74 0.10 250);                /* 3건 */
+--consult-navy-4: oklch(0.58 0.13 250);                /* 4건+ */
+--consult-navy-fg-light: oklch(0.20 0.05 250);         /* 옅은 배경용 텍스트 */
+--consult-navy-fg-dark:  oklch(0.98 0.01 250);         /* 진한 배경용 텍스트 */
+```
+다크 모드 블록에도 대응 톤 추가 (`:root.dark`/`.dark`).
 
-**`src/lib/surveys.functions.ts`** (신규)
-- `createSurvey(payload)`: zod 검증 후 admin insert.
-- `getSurveyByCode(code)`: 단건 조회.
-- `listAllSurveys()`: 검색/필터용 전체 목록 조회.
+### 3. 카드 적용 — `BrowseAll.tsx`, `KeywordSearch.tsx`
+공통 헬퍼를 `src/lib/consult-shade.ts`로 분리:
+```ts
+export function consultShade(count: number) {
+  const step = Math.min(4, count); // 0..4
+  return {
+    bg: `var(--consult-navy-${step})`,
+    fg: step >= 3 ? `var(--consult-navy-fg-dark)` : `var(--consult-navy-fg-light)`,
+  };
+}
+```
+카드 렌더링:
+- `filtered` 변경 시 `useQuery(["consult-counts", codes], () => countConsultationsByCodes({ data: { codes } }))` 로 카운트 일괄 조회
+- 각 카드 `style={{ background: shade.bg, color: shade.fg }}` 적용 (배경만 토큰, 나머지 클래스는 그대로)
+- 우측 chevron 옆에 배지 추가: `컨설팅 기록 ({count})`
+  - 0건이면 `variant="outline"`, 1건 이상이면 `variant="secondary"` + 같은 네이비 톤
 
-**`src/lib/surveys.server.ts`** (신규, 헬퍼)
-- DB ↔ 앱 타입 매퍼 등 공유 로직. (`tss-serverfn-split` 회피 위해 분리)
+### 4. 캐시 무효화
+`ConsultationPanel`에서 작성/수정/삭제 후 `queryKey: ["consult-counts"]` 도 무효화하도록 추가 → 목록 색이 즉시 갱신.
 
-### 2단계 — 클라이언트 코드 교체 (DB는 아직 그대로 → 단계별 검증 가능)
+## 기술 메모
+- `consultations` 테이블은 RLS로 닫혀 있어 service_role을 쓰는 서버 함수에서만 집계 가능 → 위 server fn 필수.
+- 한 번에 최대 1000개 코드 조회 (현재 `listAllResponses` 도 1000건 제한과 일치).
+- 색은 모두 `src/styles.css`의 시멘틱 토큰 경유 — 컴포넌트에 hex/oklch 직접 작성하지 않음.
+- 다크 모드에서 가독성 유지하도록 fg 토큰 2단 사용.
 
-- `src/components/consult/ConsultationPanel.tsx`: `fetchConsultations` → `useServerFn(listConsultations)`. `pin_hash` 분기 → 서버가 내려준 `canModify` 사용.
-- `src/lib/storage.ts`: `listAllResponses`, 설문 저장/단건 조회 함수를 `surveys.functions.ts` 호출로 변경.
-- 호출부 점검: `BrowseAll`, `KeywordSearch`, `consult/CodeEntry`, `SurveyFlow` 등.
-
-### 3단계 — RLS 정책 변경 (마지막)
-
-마이그레이션 SQL:
-- `consultations_public_select`, `consultations_public_insert` DROP
-- `surveys_public_select`, `surveys_public_insert` DROP
-- anon/authenticated 직접 GRANT 회수 (service_role ALL만 유지)
-
-이 순서면 클라이언트 직접 쿼리 경로가 사라진 뒤에 정책을 닫으므로 중간에 깨지지 않음.
-
-### 4단계 — 검증
-
-프리뷰에서:
-- [ ] 신규 설문 작성 → 결과 페이지
-- [ ] 코드로 결과 열람
-- [ ] 학교급/과목 필터
-- [ ] 키워드 검색
-- [ ] 컨설팅 작성/수정/삭제
-- [ ] 잘못된 PIN → 실패
-- [ ] Network 탭 응답에 `pin_hash` 없음
-
-`supabase--linter`로 잔여 경고 확인.
-
-## 기술 상세
-
-- 서버 함수 응답에서 컬럼 화이트리스트 명시(`select('id, survey_code, consultant_name, content, link_url, created_at')`) — `*` 금지.
-- `.functions.ts` 파일은 `createServerFn` 선언만, 헬퍼는 `.server.ts`로 분리 (서버-fn 코드 스플리터 안전).
-- React Query 키(`["consultations", surveyCode]`, `["all-responses"]`) 유지 → 캐시·무효화 동작 그대로.
-- SSR 호환: `view.tsx`, `consult.tsx` loader에서 서버 함수 호출 시 `SUPABASE_SERVICE_ROLE_KEY` 이미 설정됨.
-
-## 범위 외 (이번엔 안 함)
-- 사용자 인증(로그인) 도입 — 익명 공개 흐름 유지.
-- PIN 길이/잠금 정책 변경.
-- IP 기반 rate limit — 후속 작업으로 별도 제안 가능.
+## 범위 외
+- 컨설팅 기록 정렬·필터(개수 기준) — 별도 요청 시 추가
+- 결과 페이지(Dashboard) 내부 디자인 변경

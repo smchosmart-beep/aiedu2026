@@ -61,7 +61,11 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
     queryFn: () => listFn({ data: { surveyCode } }),
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["consultations", surveyCode] });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["consultations", surveyCode] });
+    qc.invalidateQueries({ queryKey: ["consult-counts"] });
+  };
+
 
   const create = useMutation({
     mutationFn: () =>

@@ -88,6 +88,30 @@ export const listConsultations = createServerFn({ method: "POST" })
     }));
   });
 
+export const countConsultationsByCodes = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        codes: z.array(z.string().trim().min(1).max(20)).max(1000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }): Promise<Record<string, number>> => {
+    if (data.codes.length === 0) return {};
+    const { data: rows, error } = await supabaseAdmin
+      .from("consultations")
+      .select("survey_code")
+      .in("survey_code", data.codes);
+    if (error) throw new Error(error.message);
+    const map: Record<string, number> = {};
+    for (const r of rows ?? []) {
+      const k = r.survey_code as string;
+      map[k] = (map[k] ?? 0) + 1;
+    }
+    return map;
+  });
+
+
 export const createConsultation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
