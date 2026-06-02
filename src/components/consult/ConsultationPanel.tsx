@@ -15,32 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
 import {
   createConsultation,
   updateConsultation,
   deleteConsultation,
+  listConsultations,
+  type ConsultationItem,
 } from "@/lib/consultations.functions";
 
-type Consultation = {
-  id: string;
-  survey_code: string;
-  consultant_name: string;
-  content: string;
-  link_url: string | null;
-  created_at: string;
-  pin_hash: string;
-};
-
-async function fetchConsultations(code: string): Promise<Consultation[]> {
-  const { data, error } = await supabase
-    .from("consultations")
-    .select("id, survey_code, consultant_name, content, link_url, created_at, pin_hash")
-    .eq("survey_code", code)
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Consultation[];
-}
+type Consultation = ConsultationItem;
 
 function safeHostname(url: string): string | null {
   try {
