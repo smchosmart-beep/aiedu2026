@@ -1,16 +1,20 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { listAllResponses } from "@/lib/storage";
+import { countConsultationsByCodes } from "@/lib/consultations.functions";
+import { consultShade } from "@/lib/consult-shade";
 import {
   inferSchoolLevel,
   SCHOOL_LEVEL_LABEL,
   type SurveyResponse,
 } from "@/lib/types";
 import { Dashboard } from "./Dashboard";
+
 
 export function KeywordSearch() {
   const [keyword, setKeyword] = useState("");
