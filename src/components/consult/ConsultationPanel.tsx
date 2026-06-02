@@ -224,7 +224,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
         )}
 
         {list?.map((c) => {
-          const canModify = !readOnly && c.pin_hash !== "";
+          const canModify = !readOnly && c.canModify;
           const host = c.link_url ? safeHostname(c.link_url) : null;
           return (
             <article
