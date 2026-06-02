@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, PencilLine, Eye, ArrowRight } from "lucide-react";
+import { ClipboardList, PencilLine, Eye, ArrowRight, ExternalLink } from "lucide-react";
 
 export function Landing() {
   return (
@@ -48,16 +48,24 @@ export function Landing() {
             icon={<Eye className="w-7 h-7" />}
             delay={0.3}
           />
-          <Card
-            to="https://canva.link/2026ai"
-            external
-            tag="발표 자료"
-            title="수업 및 평가 혁신 사례 컨설팅 발표(초등) 자료 보기"
-            desc="외부 링크(Canva)로 이동합니다"
-            icon={<Eye className="w-7 h-7" />}
-            delay={0.4}
-          />
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45 }}
+          className="mt-8 pt-6 border-t border-border"
+        >
+          <a
+            href="https://canva.link/2026ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>교사지원단 OT 참석자용 · 수업 및 평가 혁신 사례 컨설팅 발표(초등) 자료 보기</span>
+          </a>
+        </motion.div>
 
       </div>
     </div>
@@ -65,17 +73,11 @@ export function Landing() {
 }
 
 function Card({
-  to, tag, title, desc, icon, primary, delay = 0, external,
+  to, tag, title, desc, icon, primary, delay = 0,
 }: {
   to: string; tag: string; title: string; desc: string;
-  icon: React.ReactNode; primary?: boolean; delay?: number; external?: boolean;
+  icon: React.ReactNode; primary?: boolean; delay?: number;
 }) {
-  const classes = [
-    "block rounded-3xl p-6 shadow-sm border-2 border-transparent transition-colors",
-    primary
-      ? "bg-primary text-primary-foreground hover:border-primary/30"
-      : "bg-card hover:border-primary/30",
-  ].join(" ");
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -83,49 +85,40 @@ function Card({
       transition={{ delay }}
       whileTap={{ scale: 0.98 }}
     >
-      {external ? (
-        <a href={to} target="_blank" rel="noopener noreferrer" className={classes}>
-          <CardInner tag={tag} title={title} desc={desc} icon={icon} primary={primary} />
-        </a>
-      ) : (
-        <Link to={to} className={classes}>
-          <CardInner tag={tag} title={title} desc={desc} icon={icon} primary={primary} />
-        </Link>
-      )}
+      <Link
+        to={to}
+        className={[
+          "block rounded-3xl p-6 shadow-sm border-2 border-transparent transition-colors",
+          primary
+            ? "bg-primary text-primary-foreground hover:border-primary/30"
+            : "bg-card hover:border-primary/30",
+        ].join(" ")}
+      >
+        <div className="flex items-start gap-4">
+          <div className={[
+            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+            primary ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
+          ].join(" ")}>
+            {icon}
+          </div>
+          <div className="flex-1">
+            <div className={[
+              "text-xs font-semibold tracking-wide",
+              primary ? "text-white/80" : "text-primary",
+            ].join(" ")}>
+              {tag}
+            </div>
+            <div className="text-xl font-bold mt-1">{title}</div>
+            <div className={[
+              "text-sm mt-1",
+              primary ? "text-white/80" : "text-muted-foreground",
+            ].join(" ")}>
+              {desc}
+            </div>
+          </div>
+          <ArrowRight className="w-5 h-5 mt-4 opacity-70" />
+        </div>
+      </Link>
     </motion.div>
   );
 }
-
-function CardInner({
-  tag, title, desc, icon, primary,
-}: {
-  tag: string; title: string; desc: string; icon: React.ReactNode; primary?: boolean;
-}) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className={[
-        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
-        primary ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
-      ].join(" ")}>
-        {icon}
-      </div>
-      <div className="flex-1">
-        <div className={[
-          "text-xs font-semibold tracking-wide",
-          primary ? "text-white/80" : "text-primary",
-        ].join(" ")}>
-          {tag}
-        </div>
-        <div className="text-xl font-bold mt-1">{title}</div>
-        <div className={[
-          "text-sm mt-1",
-          primary ? "text-white/80" : "text-muted-foreground",
-        ].join(" ")}>
-          {desc}
-        </div>
-      </div>
-      <ArrowRight className="w-5 h-5 mt-4 opacity-70" />
-    </div>
-  );
-}
-
