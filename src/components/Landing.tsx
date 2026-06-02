@@ -65,19 +65,6 @@ export function Landing() {
 }
 
 function Card({
-  to, tag, title, desc, icon, primary, delay = 0,
-}: {
-  to: string; tag: string; title: string; desc: string;
-  icon: React.ReactNode; primary?: boolean; delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      whileTap={{ scale: 0.98 }}
-    >
-function Card({
   to, tag, title, desc, icon, primary, delay = 0, external,
 }: {
   to: string; tag: string; title: string; desc: string;
@@ -141,17 +128,4 @@ function CardInner({
     </div>
   );
 }
-            <div className="text-xl font-bold mt-1">{title}</div>
-            <div className={[
-              "text-sm mt-1",
-              primary ? "text-white/80" : "text-muted-foreground",
-            ].join(" ")}>
-              {desc}
-            </div>
-          </div>
-          <ArrowRight className="w-5 h-5 mt-4 opacity-70" />
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
+
