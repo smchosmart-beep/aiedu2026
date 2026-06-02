@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { ChevronRight, Loader2 } from "lucide-react";
 import {
@@ -11,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { listAllResponses } from "@/lib/storage";
+import { countConsultationsByCodes } from "@/lib/consultations.functions";
+import { consultShade } from "@/lib/consult-shade";
 import {
   inferSchoolLevel,
   SCHOOL_LEVEL_LABEL,
@@ -18,6 +21,7 @@ import {
   type SurveyResponse,
 } from "@/lib/types";
 import { Dashboard } from "./Dashboard";
+
 
 const LEVELS: { value: SchoolLevel | "all"; label: string }[] = [
   { value: "all", label: "전체 학교급" },
