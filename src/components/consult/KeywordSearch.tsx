@@ -91,35 +91,48 @@ export function KeywordSearch() {
           <>
             <div className="text-xs text-muted-foreground mb-3">총 {filtered.length}건</div>
             <div className="space-y-3">
-              {filtered.map((r) => (
-                <button
-                  key={r.code}
-                  onClick={() => setSelected(r)}
-                  className="w-full text-left p-4 rounded-2xl border bg-card hover:bg-muted/50 transition flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">{r.schoolName}</div>
-                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                      <Badge variant="secondary" className="rounded-full text-[11px]">
-                        {r.region}
-                      </Badge>
-                      <Badge variant="outline" className="rounded-full text-[11px]">
-                        {SCHOOL_LEVEL_LABEL[inferSchoolLevel(r.schoolName)]}
-                      </Badge>
-                      {r.targetSubject?.trim() && (
-                        <Badge variant="outline" className="rounded-full text-[11px]">
-                          {r.targetSubject}
+              {filtered.map((r) => {
+                const count = counts?.[r.code] ?? 0;
+                const shade = consultShade(count);
+                const dark = shade.step >= 3;
+                return (
+                  <button
+                    key={r.code}
+                    onClick={() => setSelected(r)}
+                    style={{ backgroundColor: shade.bg, color: shade.fg }}
+                    className="w-full text-left p-4 rounded-2xl border hover:opacity-90 transition flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{r.schoolName}</div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <Badge variant={dark ? "outline" : "secondary"} className="rounded-full text-[11px]">
+                          {r.region}
                         </Badge>
-                      )}
+                        <Badge variant="outline" className="rounded-full text-[11px]">
+                          {SCHOOL_LEVEL_LABEL[inferSchoolLevel(r.schoolName)]}
+                        </Badge>
+                        {r.targetSubject?.trim() && (
+                          <Badge variant="outline" className="rounded-full text-[11px]">
+                            {r.targetSubject}
+                          </Badge>
+                        )}
+                        <Badge
+                          variant={count > 0 ? (dark ? "outline" : "secondary") : "outline"}
+                          className="rounded-full text-[11px]"
+                        >
+                          컨설팅 기록 ({count})
+                        </Badge>
+                      </div>
+                      <div className="text-xs mt-2 opacity-70">
+                        {new Date(r.createdAt).toLocaleString("ko-KR")}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      {new Date(r.createdAt).toLocaleString("ko-KR")}
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-                </button>
-              ))}
+                    <ChevronRight className="w-5 h-5 shrink-0 opacity-70" />
+                  </button>
+                );
+              })}
             </div>
+
           </>
         )}
       </div>
