@@ -48,6 +48,15 @@ export function Landing() {
             icon={<Eye className="w-7 h-7" />}
             delay={0.3}
           />
+          <Card
+            to="https://canva.link/2026ai"
+            external
+            tag="발표 자료"
+            title="수업 및 평가 혁신 사례 컨설팅 발표(초등) 자료 보기"
+            desc="외부 링크(Canva)로 이동합니다"
+            icon={<Eye className="w-7 h-7" />}
+            delay={0.4}
+          />
         </div>
 
       </div>
@@ -56,11 +65,17 @@ export function Landing() {
 }
 
 function Card({
-  to, tag, title, desc, icon, primary, delay = 0,
+  to, tag, title, desc, icon, primary, delay = 0, external,
 }: {
   to: string; tag: string; title: string; desc: string;
-  icon: React.ReactNode; primary?: boolean; delay?: number;
+  icon: React.ReactNode; primary?: boolean; delay?: number; external?: boolean;
 }) {
+  const classes = [
+    "block rounded-3xl p-6 shadow-sm border-2 border-transparent transition-colors",
+    primary
+      ? "bg-primary text-primary-foreground hover:border-primary/30"
+      : "bg-card hover:border-primary/30",
+  ].join(" ");
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -68,40 +83,49 @@ function Card({
       transition={{ delay }}
       whileTap={{ scale: 0.98 }}
     >
-      <Link
-        to={to}
-        className={[
-          "block rounded-3xl p-6 shadow-sm border-2 border-transparent transition-colors",
-          primary
-            ? "bg-primary text-primary-foreground hover:border-primary/30"
-            : "bg-card hover:border-primary/30",
-        ].join(" ")}
-      >
-        <div className="flex items-start gap-4">
-          <div className={[
-            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
-            primary ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
-          ].join(" ")}>
-            {icon}
-          </div>
-          <div className="flex-1">
-            <div className={[
-              "text-xs font-semibold tracking-wide",
-              primary ? "text-white/80" : "text-primary",
-            ].join(" ")}>
-              {tag}
-            </div>
-            <div className="text-xl font-bold mt-1">{title}</div>
-            <div className={[
-              "text-sm mt-1",
-              primary ? "text-white/80" : "text-muted-foreground",
-            ].join(" ")}>
-              {desc}
-            </div>
-          </div>
-          <ArrowRight className="w-5 h-5 mt-4 opacity-70" />
-        </div>
-      </Link>
+      {external ? (
+        <a href={to} target="_blank" rel="noopener noreferrer" className={classes}>
+          <CardInner tag={tag} title={title} desc={desc} icon={icon} primary={primary} />
+        </a>
+      ) : (
+        <Link to={to} className={classes}>
+          <CardInner tag={tag} title={title} desc={desc} icon={icon} primary={primary} />
+        </Link>
+      )}
     </motion.div>
   );
 }
+
+function CardInner({
+  tag, title, desc, icon, primary,
+}: {
+  tag: string; title: string; desc: string; icon: React.ReactNode; primary?: boolean;
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className={[
+        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+        primary ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
+      ].join(" ")}>
+        {icon}
+      </div>
+      <div className="flex-1">
+        <div className={[
+          "text-xs font-semibold tracking-wide",
+          primary ? "text-white/80" : "text-primary",
+        ].join(" ")}>
+          {tag}
+        </div>
+        <div className="text-xl font-bold mt-1">{title}</div>
+        <div className={[
+          "text-sm mt-1",
+          primary ? "text-white/80" : "text-muted-foreground",
+        ].join(" ")}>
+          {desc}
+        </div>
+      </div>
+      <ArrowRight className="w-5 h-5 mt-4 opacity-70" />
+    </div>
+  );
+}
+
