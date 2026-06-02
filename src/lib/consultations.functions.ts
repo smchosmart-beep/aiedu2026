@@ -56,6 +56,38 @@ async function verifyPin(id: string, pin: string): Promise<void> {
   }
 }
 
+export type ConsultationItem = {
+  id: string;
+  survey_code: string;
+  consultant_name: string;
+  content: string;
+  link_url: string | null;
+  created_at: string;
+  canModify: boolean;
+};
+
+export const listConsultations = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ surveyCode: z.string().trim().min(1).max(20) }).parse(input),
+  )
+  .handler(async ({ data }): Promise<ConsultationItem[]> => {
+    const { data: rows, error } = await supabaseAdmin
+      .from("consultations")
+      .select("id, survey_code, consultant_name, content, link_url, created_at, pin_hash")
+      .eq("survey_code", data.surveyCode)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((r) => ({
+      id: r.id as string,
+      survey_code: r.survey_code as string,
+      consultant_name: r.consultant_name as string,
+      content: r.content as string,
+      link_url: (r.link_url as string | null) ?? null,
+      created_at: r.created_at as string,
+      canModify: typeof r.pin_hash === "string" && r.pin_hash.length > 0,
+    }));
+  });
+
 export const createConsultation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
@@ -69,6 +101,15 @@ export const createConsultation = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    // 존재하는 survey_code인지 검증 (스팸/오염 방지)
+    const { data: survey, error: lookupErr } = await supabaseAdmin
+      .from("surveys")
+      .select("code")
+      .eq("code", data.surveyCode)
+      .maybeSingle();
+    if (lookupErr) throw new Error(lookupErr.message);
+    if (!survey) throw new Error("유효하지 않은 설문 코드입니다");
+
     const salt = randomSalt();
     const hash = await sha256Hex(salt + data.pin);
     const { error } = await supabaseAdmin.from("consultations").insert({
