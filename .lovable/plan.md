@@ -1,20 +1,16 @@
-## 작업 내용
+## 계획: 기본 색상을 네이비(#38457c)로 변경
 
-`src/components/survey/StepShell.tsx`에서 홈 버튼(🏠) 클릭 시 호출되는 브라우저 기본 `window.confirm()`을 shadcn의 `AlertDialog` 컴포넌트로 교체합니다.
+`src/styles.css`의 디자인 토큰만 수정합니다. 컴포넌트는 모두 시맨틱 토큰(`primary`, `ring`, `accent`)을 사용하므로 한 곳만 바꾸면 전체 앱에 반영됩니다.
 
-기본 confirm 대화상자는 OS/브라우저가 그리기 때문에 도메인 주소(`...lovableproject.com에 삽입된 페이지 내용:`)가 자동으로 표시됩니다. 앱 내부 모달로 바꾸면 이 주소 노출이 사라지고, 디자인도 앱 톤에 맞게 통일됩니다.
+### 변경 사항 (`src/styles.css`)
 
-### 변경 사항
-
-- `useState`로 모달 열림 상태 관리
-- 홈 아이콘 클릭 → `setOpen(true)`
-- `AlertDialog` 표시
-  - 제목: "진단을 중단할까요?"
-  - 설명: "입력한 내용은 저장되지 않아요."
-  - 취소 / 확인 버튼 (확인 시 `/`로 이동)
-- 기존 `window.confirm` 호출 제거
+- `--primary`: 기존 Toss blue → `oklch` 변환된 `#38457c` (≈ `oklch(0.36 0.11 270)`)
+- `--ring`: `--primary`와 동일하게 맞춤
+- `--accent`: 네이비와 어울리도록 매우 옅은 네이비 톤으로 조정 (`oklch(0.96 0.02 270)`)
+- `--accent-foreground`: 네이비 톤으로 (`oklch(0.36 0.11 270)`)
 
 ### 영향 범위
 
-- 파일 1개만 수정: `src/components/survey/StepShell.tsx`
-- 기능/로직 변경 없음 (UI만 교체)
+- Primary 버튼, 링크, 포커스 링, 진행 표시줄, 강조 배경 등 파란색 계열 전반이 네이비로 변경됩니다.
+- 다른 색(배경, 텍스트, 보더, destructive 등)은 그대로 유지됩니다.
+- 컴포넌트 코드는 수정하지 않습니다.
