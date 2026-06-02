@@ -58,8 +58,17 @@ export function BrowseAll() {
     });
   }, [data, level, subject]);
 
+  const codes = useMemo(() => filtered.map((r) => r.code), [filtered]);
+  const countConsults = useServerFn(countConsultationsByCodes);
+  const { data: counts } = useQuery({
+    queryKey: ["consult-counts", codes],
+    queryFn: () => countConsults({ data: { codes } }),
+    enabled: codes.length > 0,
+  });
+
   if (selected)
     return <Dashboard data={selected} onBack={() => setSelected(null)} readOnly />;
+
 
   return (
     <div className="max-w-2xl w-full mx-auto px-5 pt-8 pb-12">
