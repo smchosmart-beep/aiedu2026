@@ -48,6 +48,15 @@ export function Landing() {
             icon={<Eye className="w-7 h-7" />}
             delay={0.3}
           />
+          <Card
+            to="https://canva.link/2026ai"
+            external
+            tag="발표 자료"
+            title="수업 및 평가 혁신 사례 컨설팅 발표(초등) 자료 보기"
+            desc="외부 링크(Canva)로 이동합니다"
+            icon={<Eye className="w-7 h-7" />}
+            delay={0.4}
+          />
         </div>
 
       </div>
