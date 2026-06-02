@@ -45,6 +45,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
   const createFn = useServerFn(createConsultation);
   const updateFn = useServerFn(updateConsultation);
   const deleteFn = useServerFn(deleteConsultation);
+  const listFn = useServerFn(listConsultations);
 
   const [editTarget, setEditTarget] = useState<Consultation | null>(null);
   const [editName, setEditName] = useState("");
@@ -57,7 +58,7 @@ export function ConsultationPanel({ surveyCode, readOnly = false }: { surveyCode
 
   const { data: list, isLoading } = useQuery({
     queryKey: ["consultations", surveyCode],
-    queryFn: () => fetchConsultations(surveyCode),
+    queryFn: () => listFn({ data: { surveyCode } }),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["consultations", surveyCode] });
