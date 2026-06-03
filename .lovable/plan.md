@@ -1,71 +1,43 @@
-# 컨설팅 기록 수에 따라 카드 색상 구분
+## README.md 재작성 계획
 
-## 목표
-`/view` → "학교급·과목으로 찾기"(BrowseAll) / "키워드로 검색"(KeywordSearch) 결과 카드에서, 각 설문(survey_code)에 달린 **컨설팅 기록 개수**에 따라
-- 개수를 배지로 표시 ("컨설팅 기록 (N)")
-- 카드 배경을 네이비 농도로 구분 (0개 → 기본, 많을수록 진해짐)
+`README.md`를 일반인(비개발자: 교사, 연구자, 학교 관계자)도 쉽게 이해할 수 있도록 전면 다시 씁니다. 기술 용어는 최소화하고, 꼭 필요한 개발 정보는 맨 아래 "개발자용" 섹션으로 분리합니다.
 
-## 변경 사항
+### 새 구조
 
-### 1. 서버 함수 추가 — `src/lib/consultations.functions.ts`
-```ts
-export const countConsultationsByCodes = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ codes: z.array(z.string().min(1).max(20)).max(1000) }).parse)
-  .handler(async ({ data }): Promise<Record<string, number>> => {
-    if (data.codes.length === 0) return {};
-    const { data: rows, error } = await supabaseAdmin
-      .from("consultations")
-      .select("survey_code")
-      .in("survey_code", data.codes);
-    if (error) throw new Error(error.message);
-    const map: Record<string, number> = {};
-    for (const r of rows ?? []) {
-      const k = r.survey_code as string;
-      map[k] = (map[k] ?? 0) + 1;
-    }
-    return map;
-  });
-```
+1. **제목 + 소개 (사용자 지정 문구 그대로 사용)**
+   ```
+   # AI 디지털 활용 선도학교 수업 평가 컨설팅 사전진단 도구
 
-### 2. 디자인 토큰 — `src/styles.css`
-컨설팅 강도용 네이비 스케일을 시멘틱 토큰으로 등록 (직접 색 사용 금지 원칙 준수).
-```css
---consult-navy-0: var(--card);                         /* 0건 — 기본 */
---consult-navy-1: oklch(0.94 0.03 250);                /* 1건 */
---consult-navy-2: oklch(0.86 0.06 250);                /* 2건 */
---consult-navy-3: oklch(0.74 0.10 250);                /* 3건 */
---consult-navy-4: oklch(0.58 0.13 250);                /* 4건+ */
---consult-navy-fg-light: oklch(0.20 0.05 250);         /* 옅은 배경용 텍스트 */
---consult-navy-fg-dark:  oklch(0.98 0.01 250);         /* 진한 배경용 텍스트 */
-```
-다크 모드 블록에도 대응 톤 추가 (`:root.dark`/`.dark`).
+   디지털 선도학교 현장의 디지털 도구 활용 실태를 파악하고,
+   동료 교사·연구자가 컨설팅 기록을 남겨 함께 성장할 수 있도록 돕는 웹 애플리케이션입니다.
 
-### 3. 카드 적용 — `BrowseAll.tsx`, `KeywordSearch.tsx`
-공통 헬퍼를 `src/lib/consult-shade.ts`로 분리:
-```ts
-export function consultShade(count: number) {
-  const step = Math.min(4, count); // 0..4
-  return {
-    bg: `var(--consult-navy-${step})`,
-    fg: step >= 3 ? `var(--consult-navy-fg-dark)` : `var(--consult-navy-fg-light)`,
-  };
-}
-```
-카드 렌더링:
-- `filtered` 변경 시 `useQuery(["consult-counts", codes], () => countConsultationsByCodes({ data: { codes } }))` 로 카운트 일괄 조회
-- 각 카드 `style={{ background: shade.bg, color: shade.fg }}` 적용 (배경만 토큰, 나머지 클래스는 그대로)
-- 우측 chevron 옆에 배지 추가: `컨설팅 기록 ({count})`
-  - 0건이면 `variant="outline"`, 1건 이상이면 `variant="secondary"` + 같은 네이비 톤
+   > 배경: 디지털 선도학교 현장의 기기·계정·평가 환경을 구조화해 수집하고
+   > 누적된 사례를 토대로 컨설팅을 제공하기 위한 도구로 개발되었습니다.
+   ```
 
-### 4. 캐시 무효화
-`ConsultationPanel`에서 작성/수정/삭제 후 `queryKey: ["consult-counts"]` 도 무효화하도록 추가 → 목록 색이 즉시 갱신.
+2. **이런 분께 도움이 됩니다** — 대상 사용자(선도학교 교사, 컨설턴트, 연구자)를 일상어로 안내.
 
-## 기술 메모
-- `consultations` 테이블은 RLS로 닫혀 있어 service_role을 쓰는 서버 함수에서만 집계 가능 → 위 server fn 필수.
-- 한 번에 최대 1000개 코드 조회 (현재 `listAllResponses` 도 1000건 제한과 일치).
-- 색은 모두 `src/styles.css`의 시멘틱 토큰 경유 — 컴포넌트에 hex/oklch 직접 작성하지 않음.
-- 다크 모드에서 가독성 유지하도록 fg 토큰 2단 사용.
+3. **무엇을 할 수 있나요?** — 3가지 핵심 기능을 비개발자 언어로:
+   - 설문 작성하고 6자리 코드 받기
+   - 코드/학교급/키워드로 결과 다시 보기
+   - 컨설팅 의견 남기기 (PIN으로 본인만 수정·삭제)
 
-## 범위 외
-- 컨설팅 기록 정렬·필터(개수 기준) — 별도 요청 시 추가
-- 결과 페이지(Dashboard) 내부 디자인 변경
+4. **사용 방법 (3단계 안내)** — 화면 흐름 중심, 스크린샷 자리 표시 없이 글로만:
+   - ① 설문 응답 → ② 코드 저장 → ③ 결과 페이지에서 컨설팅 받기/주기
+
+5. **자주 묻는 질문 (FAQ)**
+   - 코드를 잃어버리면? / PIN을 잊으면? / 응답이 공개되나요? / 누가 컨설팅을 남길 수 있나요? 등 4~6개.
+
+6. **개인정보·보안 안내** — "이름·학교 등 입력값은 컨설팅 목적으로만 사용되며, 직접 접근이 차단된 데이터베이스에 저장됩니다" 수준의 평이한 설명.
+
+7. **바로 사용해 보기** — Production / Preview URL 링크.
+
+8. **문의 / 활용** — 연구·교육 비영리 목적 안내.
+
+9. **개발자용 정보 (접이식 `<details>` 블록)** — 기존 기술 스택, 디렉터리 구조, 로컬 개발 명령, 보안 모델, 배포 방법을 이 안에 모두 이동. 일반 독자에게는 기본 접힘 상태로 노출.
+
+### 변경 범위
+
+- 파일: `README.md` 단 한 개 수정 (전체 재작성).
+- 코드/기능/디자인 변경 없음.
+- 기존 정보 손실 없음 — 기술 정보는 9번 접이식 섹션에 모두 보존.
