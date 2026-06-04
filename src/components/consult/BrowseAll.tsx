@@ -39,6 +39,8 @@ export function BrowseAll() {
   const { data, isLoading } = useQuery({
     queryKey: ["all-responses"],
     queryFn: listAllResponses,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 
   const subjects = useMemo(() => {
@@ -64,6 +66,7 @@ export function BrowseAll() {
     queryKey: ["consult-counts", codes],
     queryFn: () => countConsults({ data: { codes } }),
     enabled: codes.length > 0,
+    staleTime: 30_000,
   });
 
   if (selected)

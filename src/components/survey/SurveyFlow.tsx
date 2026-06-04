@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { StepShell } from "./StepShell";
@@ -89,6 +90,7 @@ export function SurveyFlow() {
 
   const [submitting, setSubmitting] = useState(false);
   const [difficultyDetail, setDifficultyDetail] = useState("");
+  const queryClient = useQueryClient();
   const submit = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -104,6 +106,7 @@ export function SurveyFlow() {
     };
     try {
       await saveResponse(r);
+      queryClient.invalidateQueries({ queryKey: ["all-responses"] });
       setDone(r.code);
     } catch (e) {
       toast.error((e as Error).message || "저장에 실패했습니다");
